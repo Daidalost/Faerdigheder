@@ -13,6 +13,7 @@ import {
 } from "@/lib/fremskridt";
 import { NIVEAU_RAEKKEFOELGE } from "@/lib/typer";
 import { Medaljer, Statuslinje, Toplinje } from "./Deler";
+import { Pokal } from "./Ikoner";
 
 export default function Forside() {
   const [f, setF] = useState<Fremskridt>({});
@@ -22,6 +23,13 @@ export default function Forside() {
     setF(laesFremskridt());
     setKlar(true);
   }, []);
+
+  const alleEmner = KATALOG.flatMap((k) => k.emner);
+  const ialt = alleEmner.length * NIVEAU_RAEKKEFOELGE.length;
+  const pokaler = alleEmner.reduce(
+    (sum, e) => sum + NIVEAU_RAEKKEFOELGE.filter((n) => erGennemfoert(f, e.id, n)).length,
+    0,
+  );
 
   return (
     <>
@@ -36,7 +44,17 @@ export default function Forside() {
           Guld ligger på samme niveau som prøven uden hjælpemidler.
         </p>
 
-        <div style={{ maxWidth: 420, marginTop: 22, ["--accent" as string]: "var(--blaek)" }}>
+        <div style={{ marginTop: 22 }}>
+          <span className="pokaltaeller">
+            <Pokal stoerrelse={30} daempet={pokaler === 0} svaever={pokaler > 0} />
+            <span>
+              <span className="tal">{klar ? pokaler : "–"}</span>{" "}
+              <span className="af">af {ialt} niveauer klaret</span>
+            </span>
+          </span>
+        </div>
+
+        <div style={{ maxWidth: 420, marginTop: 18, ["--accent" as string]: "var(--blaek)" }}>
           <Statuslinje andel={samletAndel(f)} etiket="Samlet fremskridt" klar={klar} />
         </div>
 
@@ -58,23 +76,14 @@ export default function Forside() {
               </div>
               <p>{kategori.beskrivelse}</p>
 
-              <div style={{ marginTop: 18, display: "grid", gap: 10 }}>
+              <div style={{ marginTop: 14 }}>
                 {kategori.emner.map((emne) => (
-                  <div
-                    key={emne.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 10,
-                      fontSize: 14.5,
-                      color: "var(--blaek-lys)",
-                    }}
-                  >
+                  <div key={emne.id} className="emnelinje">
                     <span>{emne.navn}</span>
                     <Medaljer
                       opnaaet={NIVEAU_RAEKKEFOELGE.filter((n) => erGennemfoert(f, emne.id, n))}
                       klar={klar}
+                      stoerrelse={26}
                     />
                   </div>
                 ))}

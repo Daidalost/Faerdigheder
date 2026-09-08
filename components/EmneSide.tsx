@@ -12,6 +12,7 @@ import {
 } from "@/lib/fremskridt";
 import { NIVEAUER, OPGAVER_PR_RUNDE, KRAEVEDE_RIGTIGE } from "@/lib/typer";
 import { Statuslinje, Tilbage, Toplinje } from "./Deler";
+import { Laas, Medalje, Pokal } from "./Ikoner";
 
 const MAERKEFARVE: Record<string, string> = {
   bronze: "var(--bronze-farve)",
@@ -51,10 +52,16 @@ export default function EmneSide({ kategori, emne }: { kategori: Kategori; emne:
             const indhold = (
               <>
                 <span
-                  className="niveauMaerke"
-                  style={{ background: aaben ? MAERKEFARVE[niveau.id] : "var(--linje)" }}
+                  className={`niveauMaerke ${aaben ? "" : "tom"}`}
+                  style={{ ["--niveaufarve" as string]: MAERKEFARVE[niveau.id] }}
                 >
-                  {aaben ? niveau.navn.slice(0, 1).toUpperCase() : "🔒"}
+                  {!aaben ? (
+                    <Laas stoerrelse={24} />
+                  ) : niveau.id === "guld" ? (
+                    <Pokal stoerrelse={40} daempet={!klaret} svaever={klaret} />
+                  ) : (
+                    <Medalje niveau={niveau.id} stoerrelse={38} daempet={!klaret} />
+                  )}
                 </span>
                 <div className="niveauInfo">
                   <h3>{niveau.navn}</h3>
@@ -89,11 +96,14 @@ export default function EmneSide({ kategori, emne }: { kategori: Kategori; emne:
                 </div>
               );
             }
+            // Et niveau, der lige er blevet åbnet, men endnu ikke klaret,
+            // får et enkelt glimt hen over kortet, så øjet finder det.
+            const nyligtAabnet = klar && !klaret && bedste === undefined && niveau.id !== "bronze";
             return (
               <Link
                 key={niveau.id}
                 href={`/kategori/${kategori.id}/${emne.id}/${niveau.id}`}
-                className="kort niveauKort"
+                className={`kort niveauKort ${nyligtAabnet ? "oplaast" : ""}`}
               >
                 {indhold}
               </Link>

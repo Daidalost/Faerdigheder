@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { NiveauId } from "@/lib/typer";
 import { NIVEAU_RAEKKEFOELGE } from "@/lib/typer";
+import { Medalje, Pokal } from "./Ikoner";
 
 export function Toplinje({ accent }: { accent: string }) {
   return (
@@ -25,7 +26,7 @@ export function Statuslinje({
     <div className="status">
       <div className="statusTekst">
         <span>{etiket}</span>
-        <span>{klar ? `${procent} %` : " "}</span>
+        <span>{klar ? `${procent} %` : " "}</span>
       </div>
       <div className="statusSpor">
         <div className="statusFyld" style={{ width: klar ? `${procent}%` : "0%" }} />
@@ -34,10 +35,18 @@ export function Statuslinje({
   );
 }
 
-const KORT_NAVN: Record<NiveauId, string> = { bronze: "B", soelv: "S", guld: "G" };
 const FULDT_NAVN: Record<NiveauId, string> = { bronze: "Bronze", soelv: "Sølv", guld: "Guld" };
 
-export function Medaljer({ opnaaet, klar }: { opnaaet: NiveauId[]; klar: boolean }) {
+/** Tre medaljer i rækken. De opnåede er farvede, resten er stiplede omrids. */
+export function Medaljer({
+  opnaaet,
+  klar,
+  stoerrelse = 30,
+}: {
+  opnaaet: NiveauId[];
+  klar: boolean;
+  stoerrelse?: number;
+}) {
   return (
     <div className="medaljer" aria-label="Opnåede niveauer">
       {NIVEAU_RAEKKEFOELGE.map((n) => {
@@ -48,7 +57,11 @@ export function Medaljer({ opnaaet, klar }: { opnaaet: NiveauId[]; klar: boolean
             className={`medalje ${n} ${har ? "opnaaet" : ""}`}
             title={`${FULDT_NAVN[n]}${har ? " — klaret" : " — ikke klaret endnu"}`}
           >
-            {KORT_NAVN[n]}
+            {n === "guld" ? (
+              <Pokal stoerrelse={stoerrelse} daempet={!har} />
+            ) : (
+              <Medalje niveau={n} stoerrelse={stoerrelse} daempet={!har} />
+            )}
           </span>
         );
       })}

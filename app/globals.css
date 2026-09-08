@@ -33,9 +33,9 @@
   --roed: #c0432c;
   --roed-lys: #fbe4de;
 
-  --radius: 14px;
-  --radius-lille: 9px;
-  --skygge: 0 1px 2px rgba(30, 58, 76, 0.06), 0 8px 24px rgba(30, 58, 76, 0.06);
+  --radius: 18px;
+  --radius-lille: 12px;
+  --skygge: 0 1px 2px rgba(30, 58, 76, 0.05), 0 10px 30px rgba(30, 58, 76, 0.09);
   --maks: 940px;
 }
 
@@ -50,7 +50,12 @@ body {
 }
 
 body {
-  background: var(--papir);
+  background:
+    radial-gradient(820px 460px at 8% -10%, rgba(206, 91, 52, 0.10), transparent 62%),
+    radial-gradient(760px 440px at 96% 2%, rgba(62, 147, 180, 0.13), transparent 64%),
+    radial-gradient(900px 600px at 50% 118%, rgba(122, 107, 168, 0.09), transparent 60%),
+    var(--papir);
+  background-attachment: fixed;
   color: var(--blaek);
   font-family: var(--skrift-broed), "Carlito", "Calibri", system-ui, sans-serif;
   font-size: 17px;
@@ -236,31 +241,22 @@ a.kort:hover {
   gap: 6px;
   flex-shrink: 0;
 }
+.medaljer {
+  align-items: center;
+}
 .medalje {
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
   display: grid;
   place-items: center;
-  font-family: var(--skrift-overskrift), system-ui, sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  border: 1.5px solid var(--linje);
-  color: var(--linje);
-  background: var(--papir);
+  line-height: 0;
 }
 .medalje.opnaaet {
-  border-color: transparent;
-  color: #fff;
+  animation: medaljeInd 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
-.medalje.bronze.opnaaet {
-  background: var(--bronze-farve);
+.medalje.opnaaet:nth-child(2) {
+  animation-delay: 0.07s;
 }
-.medalje.soelv.opnaaet {
-  background: var(--soelv-farve);
-}
-.medalje.guld.opnaaet {
-  background: var(--guld-farve);
+.medalje.opnaaet:nth-child(3) {
+  animation-delay: 0.14s;
 }
 
 /* --- Niveaukort ------------------------------------------------------ */
@@ -274,16 +270,22 @@ a.kort:hover {
   cursor: not-allowed;
 }
 .niveauMaerke {
-  width: 46px;
-  height: 46px;
-  border-radius: 999px;
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
   display: grid;
   place-items: center;
-  font-family: var(--skrift-overskrift), system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  color: #fff;
   flex-shrink: 0;
+  background: color-mix(in srgb, var(--niveaufarve, var(--linje)) 12%, #fff);
+  border: 1px solid color-mix(in srgb, var(--niveaufarve, var(--linje)) 26%, var(--linje));
+  transition: transform 0.16s ease;
+}
+a.kort:hover .niveauMaerke {
+  transform: scale(1.06) rotate(-3deg);
+}
+.niveauMaerke.tom {
+  background: var(--papir);
+  color: var(--linje);
 }
 .niveauInfo h3 {
   font-size: 18px;
@@ -552,5 +554,222 @@ a.kort:hover {
   }
   .svarfelt {
     width: 100%;
+  }
+}
+
+/* =====================================================================
+   Bevægelse
+   Alt er kort og fjedrende. Konfetti kun ved bestået runde — ikke ved
+   hvert rigtigt svar, ellers holder det op med at betyde noget.
+   ===================================================================== */
+
+@keyframes indefra {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes medaljeInd {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) rotate(-25deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes hop {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.5);
+  }
+}
+@keyframes ryst {
+  0%, 100% { transform: translateX(0); }
+  18% { transform: translateX(-7px); }
+  38% { transform: translateX(6px); }
+  58% { transform: translateX(-4px); }
+  78% { transform: translateX(3px); }
+}
+@keyframes tegnes {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes svaev {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+  50% { transform: translateY(-6px) rotate(1.5deg); }
+}
+@keyframes glimtSweep {
+  0% { transform: translateX(-120%) skewX(-18deg); }
+  100% { transform: translateX(220%) skewX(-18deg); }
+}
+@keyframes pulsRing {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+  70% { box-shadow: 0 0 0 10px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.tegnes {
+  stroke-dasharray: 26;
+  stroke-dashoffset: 26;
+  animation: tegnes 0.34s 0.06s ease-out forwards;
+}
+.svaever {
+  animation: svaev 3.4s ease-in-out infinite;
+}
+.glimter {
+  animation: medaljeInd 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Feedbackpanelet glider ind, så øjet fanger det */
+.feedback {
+  animation: indefra 0.24s ease-out;
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+}
+.feedbackIkon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  line-height: 0;
+}
+.feedbackTekst {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Prikkerne popper, når de skifter til rigtigt eller forkert */
+.prik.rigtig,
+.prik.forkert {
+  animation: hop 0.34s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.prik.nu {
+  animation: pulsRing 1.9s ease-out infinite;
+}
+
+.opgaveKort {
+  animation: indefra 0.26s ease-out;
+}
+.opgaveKort.fejl {
+  animation: ryst 0.42s ease-in-out;
+}
+
+/* --- Stime af rigtige svar i træk ------------------------------------ */
+.stime {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--skrift-overskrift), system-ui, sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #e8833a, #ce5b34);
+  border-radius: 999px;
+  padding: 5px 12px 5px 9px;
+  animation: medaljeInd 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 12px rgba(206, 91, 52, 0.32);
+}
+
+/* --- Opsamling ------------------------------------------------------- */
+.opsamling {
+  position: relative;
+  overflow: hidden;
+}
+.konfetti {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.opsamlingPokal {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  animation: medaljeInd 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.opsamlingScore {
+  position: relative;
+  font-variant-numeric: tabular-nums;
+}
+.opsamlingTrofae {
+  margin-bottom: 6px;
+}
+
+/* Lille skinnende stribe hen over et nyoplåst niveau */
+.oplaast {
+  position: relative;
+  overflow: hidden;
+}
+.oplaast::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 80%
+  );
+  animation: glimtSweep 1.05s 0.25s ease-out;
+}
+
+/* --- Pokaltæller på forsiden ----------------------------------------- */
+.pokaltaeller {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--kort);
+  border: 1px solid var(--linje);
+  border-radius: 999px;
+  padding: 7px 16px 7px 9px;
+  box-shadow: var(--skygge);
+  font-family: var(--skrift-overskrift), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+}
+.pokaltaeller span.tal {
+  font-size: 17px;
+}
+.pokaltaeller span.af {
+  color: var(--blaek-lys);
+  font-weight: 500;
+}
+
+/* Emnerækken på kategorikortet */
+.emnelinje {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14.5px;
+  color: var(--blaek-lys);
+  padding: 7px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--linje) 55%, transparent);
+}
+.emnelinje:last-child {
+  border-bottom: 0;
+}
+
+/* --- Respekter systemets ønske om mindre bevægelse -------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .tegnes {
+    stroke-dashoffset: 0;
   }
 }

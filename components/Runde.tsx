@@ -10,6 +10,8 @@ import { erTalRigtigt } from "@/lib/tilfaeldig";
 import { gemResultat, laesFremskridt, erGennemfoert } from "@/lib/fremskridt";
 import { opsamling, opmuntring, ros } from "@/lib/feedback";
 import { NIVEAU_NAVN, Tilbage, Toplinje } from "./Deler";
+import { Flamme, Flueben, Kryds, Medalje, Pokal } from "./Ikoner";
+import Konfetti from "./Konfetti";
 
 type Fase = "svarer" | "bedoemt" | "faerdig";
 
@@ -29,6 +31,7 @@ export default function Runde({
   const [valgt, setValgt] = useState<string | null>(null);
   const [resultater, setResultater] = useState<boolean[]>([]);
   const [varKlaretFoer, setVarKlaretFoer] = useState(false);
+  const [visScore, setVisScore] = useState(0);
   const feltRef = useRef<HTMLInputElement>(null);
   const naesteRef = useRef<HTMLButtonElement>(null);
 
@@ -39,9 +42,10 @@ export default function Runde({
     setInput("");
     setValgt(null);
     setResultater([]);
+    setVisScore(0);
   }, [emne.id, niveau.id]);
 
-  // Opgaverne laves først i browseren, så serveren og klienten ikke uenige om indholdet.
+  // Opgaverne laves først i browseren, så server og klient ikke er uenige.
   useEffect(() => {
     setVarKlaretFoer(erGennemfoert(laesFremskridt(), emne.id, niveau.id));
     nyRunde();
@@ -55,6 +59,14 @@ export default function Runde({
   }, [fase, nr, opgave?.slags]);
 
   const rigtige = resultater.filter(Boolean).length;
+  const sidsteVarRigtigt = resultater[resultater.length - 1];
+
+  /** Hvor mange rigtige i træk lige nu. */
+  const stime = useMemo(() => {
+    let n = 0;
+    for (let i = resultater.length - 1; i >= 0 && resultater[i]; i--) n++;
+    return n;
+  }, [resultater]);
 
   const bedoem = useCallback(
     (svar: string) => {
@@ -90,6 +102,19 @@ export default function Runde({
     if (fase !== "faerdig") gemt.current = false;
   }, [fase, emne.id, niveau.id, resultater]);
 
+  // Scoren tælles op i stedet for bare at stå der.
+  useEffect(() => {
+    if (fase !== "faerdig") return;
+    if (rigtige === 0) return;
+    let n = 0;
+    const id = setInterval(() => {
+      n++;
+      setVisScore(n);
+      if (n >= rigtige) clearInterval(id);
+    }, 130);
+    return () => clearInterval(id);
+  }, [fase, rigtige]);
+
   const naesteNiveauId = useMemo(() => {
     const i = NIVEAU_RAEKKEFOELGE.indexOf(niveau.id);
     return i >= 0 && i < NIVEAU_RAEKKEFOELGE.length - 1 ? NIVEAU_RAEKKEFOELGE[i + 1] : null;
@@ -97,6 +122,7 @@ export default function Runde({
 
   const stil = { ["--accent" as string]: emne.farve };
 
+  // ------------------------------------------------------------------ slut
   if (fase === "faerdig") {
     const bestod = rigtige >= 4;
     const laastOp = bestod && naesteNiveauId ? NIVEAU_NAVN[naesteNiveauId] : null;
@@ -107,12 +133,27 @@ export default function Runde({
         <main className="side" style={stil}>
           <Tilbage href={`/kategori/${kategori.id}/${emne.id}`} tekst={emne.navn} />
           <div className="kort udenstribe opsamling">
+            {bestod && <Konfetti antal={rigtige === OPGAVER_PR_RUNDE ? 120 : 80} />}
+
+            <div className="opsamlingPokal opsamlingTrofae">
+              {bestod ? (
+                niveau.id === "guld" ? (
+                  <Pokal stoerrelse={86} svaever />
+                ) : (
+                  <Medalje niveau={niveau.id} stoerrelse={86} glimt />
+                )
+              ) : (
+                <Medalje niveau={niveau.id} stoerrelse={86} daempet />
+              )}
+            </div>
+
             <div className="opsamlingScore">
-              {rigtige}
+              {visScore}
               <span style={{ fontSize: 26, color: "var(--blaek-lys)" }}>/{OPGAVER_PR_RUNDE}</span>
             </div>
             <h2>{o.overskrift}</h2>
             <p>{o.tekst}</p>
+
             <div className="opsamlingKnapper">
               <button
                 className="knap"
@@ -141,6 +182,9 @@ export default function Runde({
     );
   }
 
+  // ----------------------------------------------------------------- runden
+  const ryster = fase === "bedoemt" && sidsteVarRigtigt === false;
+
   return (
     <>
       <Toplinje accent={emne.farve} />
@@ -156,25 +200,33 @@ export default function Runde({
               Opgave {Math.min(nr + 1, OPGAVER_PR_RUNDE)} af {OPGAVER_PR_RUNDE}
             </h1>
           </div>
-          <div className="prikker" aria-label={`${rigtige} rigtige indtil nu`}>
-            {Array.from({ length: OPGAVER_PR_RUNDE }).map((_, i) => (
-              <span
-                key={i}
-                className={`prik ${
-                  i < resultater.length
-                    ? resultater[i]
-                      ? "rigtig"
-                      : "forkert"
-                    : i === nr && fase === "svarer"
-                      ? "nu"
-                      : ""
-                }`}
-              />
-            ))}
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            {stime >= 2 && (
+              <span className="stime" key={stime}>
+                <Flamme stoerrelse={15} />
+                {stime} i træk
+              </span>
+            )}
+            <div className="prikker" aria-label={`${rigtige} rigtige indtil nu`}>
+              {Array.from({ length: OPGAVER_PR_RUNDE }).map((_, i) => (
+                <span
+                  key={i}
+                  className={`prik ${
+                    i < resultater.length
+                      ? resultater[i]
+                        ? "rigtig"
+                        : "forkert"
+                      : i === nr && fase === "svarer"
+                        ? "nu"
+                        : ""
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="opgaveKort">
+        <div className={`opgaveKort ${ryster ? "fejl" : ""}`}>
           {!opgave ? (
             <p style={{ color: "var(--blaek-lys)" }}>Henter opgaver …</p>
           ) : (
@@ -254,26 +306,21 @@ export default function Runde({
               )}
 
               {fase === "bedoemt" && (
-                <div
-                  className={`feedback ${resultater[resultater.length - 1] ? "rigtigt" : "forkert"}`}
-                >
-                  {resultater[resultater.length - 1] ? (
-                    <>
-                      <strong>{ros(nr)}</strong>
-                      <span className="strategimaerke">{opgave.strategi}</span>
-                      <div>{opgave.hint}</div>
-                    </>
-                  ) : (
-                    <>
-                      <strong>{opmuntring(nr)}</strong>
-                      <span className="strategimaerke">{opgave.strategi}</span>
-                      <div>{opgave.hint}</div>
+                <div className={`feedback ${sidsteVarRigtigt ? "rigtigt" : "forkert"}`}>
+                  <span className="feedbackIkon">
+                    {sidsteVarRigtigt ? <Flueben stoerrelse={28} /> : <Kryds stoerrelse={28} />}
+                  </span>
+                  <span className="feedbackTekst">
+                    <strong>{sidsteVarRigtigt ? ros(nr) : opmuntring(nr)}</strong>
+                    <span className="strategimaerke">{opgave.strategi}</span>
+                    <div>{opgave.hint}</div>
+                    {!sidsteVarRigtigt && (
                       <div className="facitlinje">
                         Svaret er <strong style={{ display: "inline" }}>{opgave.svar}</strong>
                         {opgave.enhed ? ` ${opgave.enhed}` : ""}.
                       </div>
-                    </>
-                  )}
+                    )}
+                  </span>
                 </div>
               )}
             </>
