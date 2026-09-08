@@ -1,0 +1,556 @@
+/* =====================================================================
+   Færdighedsappen — designtokens
+   Farverne er de samme som i kompendie.sty, så app og papir hænger sammen.
+   ===================================================================== */
+
+:root {
+  --papir: #f0f5f7;
+  --kort: #ffffff;
+  --blaek: #1e3a4c;
+  --blaek-lys: #5b7383;
+  --linje: #c7d5dc;
+
+  --terra: #ce5b34;
+  --terra-lys: #fae7de;
+  --teal: #2c7f76;
+  --teal-lys: #ddefec;
+  --blaa: #2e6e9e;
+  --blaa-lys: #e3eef7;
+  --lilla: #7a6ba8;
+  --lilla-lys: #ece9f5;
+  --vand: #3e93b4;
+  --vand-lys: #e2f0f5;
+  --okker: #9a6c15;
+  --okker-lys: #fbefd3;
+  --guld: #e3a73a;
+
+  --bronze-farve: #b06a3b;
+  --soelv-farve: #7d8b98;
+  --guld-farve: #c9911f;
+
+  --groen: #2c7f5a;
+  --groen-lys: #ddf0e7;
+  --roed: #c0432c;
+  --roed-lys: #fbe4de;
+
+  --radius: 14px;
+  --radius-lille: 9px;
+  --skygge: 0 1px 2px rgba(30, 58, 76, 0.06), 0 8px 24px rgba(30, 58, 76, 0.06);
+  --maks: 940px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--papir);
+  color: var(--blaek);
+  font-family: var(--skrift-broed), "Carlito", "Calibri", system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+.overskrift {
+  font-family: var(--skrift-overskrift), "Poppins", system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+/* --- Toplinje, som i kompendiets sidehoved --------------------------- */
+.toplinje {
+  height: 9px;
+  display: flex;
+}
+.toplinje span:first-child {
+  width: 34%;
+  background: var(--guld);
+}
+.toplinje span:last-child {
+  flex: 1;
+  background: var(--accent, var(--terra));
+}
+
+/* --- Layout ---------------------------------------------------------- */
+.side {
+  max-width: var(--maks);
+  margin: 0 auto;
+  padding: 28px 22px 72px;
+}
+
+.kicker {
+  font-family: var(--skrift-overskrift), "Poppins", system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--accent, var(--blaek-lys));
+  font-weight: 500;
+}
+
+.titel {
+  font-size: clamp(28px, 5vw, 38px);
+  margin: 6px 0 0;
+}
+
+.manchet {
+  color: var(--blaek-lys);
+  max-width: 62ch;
+  margin: 12px 0 0;
+}
+
+.skillelinje {
+  border: 0;
+  border-top: 1px solid var(--linje);
+  margin: 22px 0 26px;
+}
+
+/* --- Tilbagelink ----------------------------------------------------- */
+.tilbage {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  color: var(--blaek-lys);
+  margin-bottom: 18px;
+  padding: 5px 11px 5px 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+.tilbage:hover {
+  background: var(--kort);
+  border-color: var(--linje);
+  color: var(--blaek);
+}
+
+/* --- Kort ------------------------------------------------------------ */
+.gitter {
+  display: grid;
+  gap: 16px;
+}
+.gitter.to {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.kort {
+  display: block;
+  background: var(--kort);
+  border: 1px solid var(--linje);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  box-shadow: var(--skygge);
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+  position: relative;
+  overflow: hidden;
+}
+a.kort:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--linje));
+  box-shadow: 0 2px 4px rgba(30, 58, 76, 0.07), 0 14px 32px rgba(30, 58, 76, 0.1);
+}
+.kort::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: var(--accent, var(--terra));
+}
+.kort.udenstribe::before {
+  display: none;
+}
+/* Kort med statuslinje i bunden — så linjerne flugter, uanset hvor
+   mange emner kortet indeholder. */
+.kort.stabel {
+  display: flex;
+  flex-direction: column;
+}
+.kort.stabel > .status {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.kort h2,
+.kort h3 {
+  font-size: 20px;
+}
+.kort p {
+  color: var(--blaek-lys);
+  margin: 8px 0 0;
+  font-size: 15px;
+}
+
+.kortHoved {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+/* --- Statuslinje ----------------------------------------------------- */
+.status {
+  margin-top: 16px;
+}
+.statusTekst {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: var(--blaek-lys);
+  margin-bottom: 6px;
+}
+.statusSpor {
+  height: 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 14%, var(--papir));
+  overflow: hidden;
+}
+.statusFyld {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent, var(--terra));
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* --- Medaljer -------------------------------------------------------- */
+.medaljer {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.medalje {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-family: var(--skrift-overskrift), system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  border: 1.5px solid var(--linje);
+  color: var(--linje);
+  background: var(--papir);
+}
+.medalje.opnaaet {
+  border-color: transparent;
+  color: #fff;
+}
+.medalje.bronze.opnaaet {
+  background: var(--bronze-farve);
+}
+.medalje.soelv.opnaaet {
+  background: var(--soelv-farve);
+}
+.medalje.guld.opnaaet {
+  background: var(--guld-farve);
+}
+
+/* --- Niveaukort ------------------------------------------------------ */
+.niveauKort {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.niveauKort.laast {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.niveauMaerke {
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-family: var(--skrift-overskrift), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+  flex-shrink: 0;
+}
+.niveauInfo h3 {
+  font-size: 18px;
+}
+.niveauInfo p {
+  margin: 3px 0 0;
+  font-size: 14px;
+}
+.niveauStatus {
+  margin-left: auto;
+  text-align: right;
+  font-size: 13px;
+  color: var(--blaek-lys);
+  flex-shrink: 0;
+}
+
+/* --- Runde ----------------------------------------------------------- */
+.rundeHoved {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+.prikker {
+  display: flex;
+  gap: 6px;
+}
+.prik {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--linje);
+}
+.prik.rigtig {
+  background: var(--groen);
+}
+.prik.forkert {
+  background: var(--roed);
+}
+.prik.nu {
+  background: transparent;
+  border: 2px solid var(--accent);
+}
+
+.opgaveKort {
+  background: var(--kort);
+  border: 1px solid var(--linje);
+  border-radius: var(--radius);
+  padding: 30px 26px;
+  box-shadow: var(--skygge);
+}
+
+.optakt {
+  font-family: var(--skrift-overskrift), system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.stykke {
+  font-size: clamp(26px, 6vw, 40px);
+  font-weight: 400;
+  margin: 12px 0 0;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+.stykke.tekst {
+  font-size: clamp(19px, 3.4vw, 24px);
+  font-weight: 400;
+}
+
+.svarrække {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+.svarfelt {
+  font-family: inherit;
+  font-size: 28px;
+  width: 190px;
+  padding: 10px 14px;
+  border-radius: var(--radius-lille);
+  border: 2px solid var(--linje);
+  background: var(--papir);
+  color: var(--blaek);
+  font-variant-numeric: tabular-nums;
+}
+.svarfelt:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #fff;
+}
+.svarfelt:disabled {
+  opacity: 0.75;
+}
+.svarEnhed {
+  font-size: 22px;
+  color: var(--blaek-lys);
+}
+
+.knap {
+  font-family: var(--skrift-overskrift), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 12px 24px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--accent, var(--terra));
+  color: #fff;
+  transition: filter 0.14s ease, transform 0.14s ease;
+}
+.knap:hover {
+  filter: brightness(1.07);
+}
+.knap:active {
+  transform: translateY(1px);
+}
+.knap.sekundaer {
+  background: transparent;
+  color: var(--blaek);
+  border: 1.5px solid var(--linje);
+}
+.knap.sekundaer:hover {
+  background: var(--kort);
+}
+.knap:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Svarmuligheder */
+.valgListe {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+.valgKnap {
+  text-align: left;
+  padding: 14px 18px;
+  border-radius: var(--radius-lille);
+  border: 2px solid var(--linje);
+  background: var(--kort);
+  color: var(--blaek);
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+.valgKnap:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+.valgKnap.valgt {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, #fff);
+}
+.valgKnap.facit {
+  border-color: var(--groen);
+  background: var(--groen-lys);
+}
+.valgKnap.fejl {
+  border-color: var(--roed);
+  background: var(--roed-lys);
+}
+.valgKnap:disabled {
+  cursor: default;
+}
+
+/* Feedback */
+.feedback {
+  margin-top: 20px;
+  border-radius: var(--radius-lille);
+  padding: 16px 18px;
+  border-left: 5px solid;
+  font-size: 15px;
+}
+.feedback.rigtigt {
+  background: var(--groen-lys);
+  border-color: var(--groen);
+}
+.feedback.forkert {
+  background: var(--roed-lys);
+  border-color: var(--roed);
+}
+.feedback strong {
+  font-family: var(--skrift-overskrift), system-ui, sans-serif;
+  display: block;
+  margin-bottom: 4px;
+}
+.feedback .facitlinje {
+  margin-top: 8px;
+  font-size: 15px;
+}
+.strategimaerke {
+  display: inline-block;
+  font-family: var(--skrift-overskrift), system-ui, sans-serif;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  padding: 3px 10px;
+  margin-bottom: 8px;
+}
+
+/* Opsamling */
+.opsamling {
+  text-align: center;
+  padding: 40px 26px;
+}
+.opsamlingScore {
+  font-family: var(--skrift-overskrift), system-ui, sans-serif;
+  font-size: 58px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+}
+.opsamling h2 {
+  font-size: 24px;
+  margin-top: 14px;
+}
+.opsamling p {
+  color: var(--blaek-lys);
+  max-width: 46ch;
+  margin: 12px auto 0;
+}
+.opsamlingKnapper {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 26px;
+  flex-wrap: wrap;
+}
+
+.fod {
+  margin-top: 44px;
+  padding-top: 16px;
+  border-top: 1px solid var(--linje);
+  font-size: 13px;
+  color: var(--blaek-lys);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.fod button {
+  background: none;
+  border: 0;
+  color: var(--blaek-lys);
+  text-decoration: underline;
+  font-size: 13px;
+  padding: 0;
+}
+
+@media (max-width: 560px) {
+  .side {
+    padding: 20px 16px 56px;
+  }
+  .opgaveKort {
+    padding: 22px 18px;
+  }
+  .svarfelt {
+    width: 100%;
+  }
+}
