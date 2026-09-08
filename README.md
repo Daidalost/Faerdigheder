@@ -57,6 +57,8 @@ components/
   Forside.tsx, KategoriSide.tsx, EmneSide.tsx   oversigterne
   Runde.tsx                                     spørgsmål, svar og feedback
   Deler.tsx                                     toplinje, statuslinje, medaljer
+  Ikoner.tsx                                    al grafik som SVG
+  Konfetti.tsx                                  konfetti ved bestået runde
 
 lib/
   katalog.ts        kategorier, emner, farver — start her, hvis du vil tilføje et emne
@@ -92,8 +94,8 @@ Eleven kan lukke computeren og fortsætte i næste time. Der er intet login og
 ingen server, så fremskridtet følger **maskinen**, ikke personen — skifter
 eleven computer, starter hun forfra. Det står der også på forsiden.
 
-Vises tre steder: medaljer (B/S/G) pr. emne, en statuslinje pr. kategori,
-og en samlet linje på forsiden.
+Vises fire steder: medaljer og pokal pr. emne, en pokaltæller øverst på
+forsiden, en statuslinje pr. kategori og en samlet linje på forsiden.
 
 ---
 
@@ -164,6 +166,38 @@ samme som i LaTeX-kompendierne (`kompendie.sty`), så app og papir hænger samme
 **Skrifttyper:** Carlito og Poppins ligger som woff2 i `public/fonts/`
 (95 KB i alt, kun de tegn der bruges). De indlæses med `next/font/local`,
 så der er ingen kald til Google Fonts.
+
+---
+
+## Det visuelle lag
+
+Al grafik er SVG skrevet direkte i koden — ingen billedfiler og ingen ikonpakke.
+
+| Fil | Hvad |
+|---|---|
+| `components/Ikoner.tsx` | medaljer, pokal, lås, flueben, kryds, flamme |
+| `components/Konfetti.tsx` | konfetti på canvas, ~60 linjer fysik, ingen pakke udefra |
+| `app/globals.css` | alle keyframes samlet nederst i filen |
+
+Medaljerne får deres metal fra `METAL`-tabellen øverst i `Ikoner.tsx`. To
+farvestop pr. metal giver dybde uden at det bliver blank plastik. Guld vises
+som pokal i stedet for medalje, så det tredje trin føles som noget andet end
+"endnu en medalje".
+
+**Hvornår der sker noget:**
+
+- rigtigt svar: flueben der tegner sig selv, og prikken i toppen popper
+- forkert svar: kortet ryster kort, og krydset vises
+- tre rigtige i træk: en flammechip dukker op i hovedet
+- bestået runde: konfetti, medaljen eller pokalen springer ind, og scoren tælles op
+- nyt niveau åbnet: et enkelt glimt hen over kortet, næste gang du ser listen
+
+Konfetti fyres kun ved en **bestået runde** — ikke ved hvert rigtigt svar.
+Ellers holder det op med at betyde noget.
+
+Hele animationslaget slår fra af sig selv, hvis eleven har "reducér bevægelse"
+slået til i styresystemet. Der er ingen lyd; i et klasselokale med 26 elever
+er det en fordel.
 
 ---
 
