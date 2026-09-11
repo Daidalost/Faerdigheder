@@ -146,7 +146,47 @@ function lavSammenligning(rng: Rng, grad: Sammenligningsgrad): Opgave {
 }
 
 /** Overslagsregning: kun størrelsesordenen skal rammes. */
-function lavOverslag(rng: Rng): Opgave {
+function lavOverslag(rng: Rng, svaer = false): Opgave {
+  if (svaer) {
+    // Begge tal har decimaler — som dec 2024 opgave 8.1 (0,51 · 0,14), men værre
+    const gangePlatin = rng() < 0.5;
+    if (gangePlatin) {
+      const A = heltal(rng, 105, 985);
+      const B = heltal(rng, 11, 89);
+      const vaerdi = Number(((A * B) / 10000).toFixed(6));
+      const udtryk = `${dansk(A / 10, 2)} · ${dansk(B / 100, 3)}`;
+      const muligheder = [-2, -1, 0, 1, 2].map((k) =>
+        dansk(Number((vaerdi * Math.pow(10, k)).toFixed(8)), 8),
+      );
+      return {
+        noegle: `ovs:p:${udtryk}`,
+        slags: "valg",
+        optakt: "Brug overslagsregning. Hvad er resultatet?",
+        spoergsmaal: udtryk,
+        svar: dansk(vaerdi, 8),
+        valg: muligheder,
+        strategi: "Tæl decimalerne",
+        hint: `${dansk(B / 100, 3)} er cirka ${dansk(Math.round(B / 10) / 10, 2)}, så svaret ligger omkring ${dansk(Math.round(((A / 10) * Math.round(B / 10)) / 10), 2)}. Tjek også antallet af decimaler: 1 + 2 giver 3.`,
+      };
+    }
+    const a = heltal(rng, 105, 985);
+    const B = vaelg(rng, [2, 4, 5, 8, 25]);
+    const vaerdi = Number(((a / 10) / (B / 100)).toFixed(6));
+    const udtryk = `${dansk(a / 10, 2)} : ${dansk(B / 100, 3)}`;
+    const muligheder = [-2, -1, 0, 1, 2].map((k) =>
+      dansk(Number((vaerdi * Math.pow(10, k)).toFixed(8)), 8),
+    );
+    return {
+      noegle: `ovs:pd:${udtryk}`,
+      slags: "valg",
+      optakt: "Brug overslagsregning. Hvad er resultatet?",
+      spoergsmaal: udtryk,
+      svar: dansk(vaerdi, 8),
+      valg: muligheder,
+      strategi: "Divider med under 1",
+      hint: `Du dividerer med ${dansk(B / 100, 3)}, altså et tal langt under 1 — svaret bliver meget større end ${dansk(a / 10, 2)}. Gang begge tal med 100: ${a * 10} : ${B}.`,
+    };
+  }
   const gange = rng() < 0.5;
   let udtryk: string;
   let vaerdi: number;
@@ -203,5 +243,8 @@ export function lavVurdering(rng: Rng, niveau: NiveauId): Opgave {
   if (niveau === "soelv") {
     return rng() < 0.45 ? fraBank(rng, SOELV) : lavSammenligning(rng, "mellem");
   }
-  return rng() < 0.62 ? lavOverslag(rng) : lavSammenligning(rng, "svaer");
+  if (niveau === "guld") {
+    return rng() < 0.62 ? lavOverslag(rng) : lavSammenligning(rng, "svaer");
+  }
+  return rng() < 0.7 ? lavOverslag(rng, true) : lavSammenligning(rng, "svaer");
 }

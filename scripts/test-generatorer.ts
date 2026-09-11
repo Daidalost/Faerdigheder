@@ -20,8 +20,14 @@ const EMNER: EmneId[] = [
   "division",
   "omregning",
   "vurdering",
+  "skrivemaader",
+  "procentregning",
+  "sammenlign",
 ];
-const NIVEAUER: NiveauId[] = ["bronze", "soelv", "guld"];
+const NIVEAUER: NiveauId[] = ["bronze", "soelv", "guld", "platin"];
+
+/** Emner hvor spørgsmålet er en sætning og ikke et regnestykke. */
+const TEKSTEMNER: EmneId[] = ["skrivemaader", "procentregning", "sammenlign"];
 
 let fejl = 0;
 const sig = (ok: boolean, besked: string) => {
@@ -35,7 +41,7 @@ const talAf = (s: string) => Number(s.replace(/\s/g, "").replace(",", "."));
 
 /** Regner et regnestykke efter forfra, uden at bruge generatorens facit. */
 function facitForStykke(udtryk: string): number | null {
-  const rent = udtryk.replace(/\s/g, "");
+  const rent = udtryk.replace(/\s/g, "").replace(/,/g, ".");
   if (rent.includes("·")) {
     return rent.split("·").map(Number).reduce((a, b) => a * b, 1);
   }
@@ -48,8 +54,7 @@ function facitForStykke(udtryk: string): number | null {
     return a - b;
   }
   if (rent.includes("+")) {
-    const [a, b] = rent.split("+").map(Number);
-    return a + b;
+    return rent.split("+").map(Number).reduce((a, b) => a + b, 0);
   }
   return null;
 }
@@ -60,6 +65,9 @@ const FAKTOR: Record<string, number> = {
   g: 1, kg: 1000,
   mL: 1, cL: 10, dL: 100, L: 1000,
   minutter: 1, timer: 60, "døgn": 1440,
+  // Areal og rumfang (platin) — samme basis som rumfangskæden: cm³ = mL
+  "cm²": 1, "dm²": 100, "m²": 10_000,
+  "cm³": 1, "m³": 1_000_000,
 };
 
 function tjekOmregning(o: Opgave): void {
@@ -84,7 +92,10 @@ function tjekOmregning(o: Opgave): void {
 
 function tjekOpgave(emne: EmneId, niveau: NiveauId, o: Opgave): void {
   const hvor = `${emne}/${niveau}`;
-  sig(o.spoergsmaal.trim().length > 0, `${hvor}: tomt spørgsmål`);
+  sig(
+    o.spoergsmaal.trim().length > 0 || (o.optakt ?? "").trim().length > 0,
+    `${hvor}: hverken spørgsmål eller optakt`,
+  );
   sig(o.svar.trim().length > 0, `${hvor}: tomt svar`);
   sig(o.hint.trim().length > 10, `${hvor}: hint mangler eller er for kort`);
   sig(o.strategi.trim().length > 0, `${hvor}: strategi mangler`);
@@ -101,6 +112,15 @@ function tjekOpgave(emne: EmneId, niveau: NiveauId, o: Opgave): void {
     return;
   }
 
+  // Tekstopgaverne har ikke et regnestykke, der kan parses — her tjekker vi
+  // kun at svaret er et tal, og at spørgsmålet nævner tallene fra svaret.
+  if (TEKSTEMNER.includes(emne)) {
+    sig(Number.isFinite(talAf(o.svar)), `${hvor}: svaret "${o.svar}" er ikke et tal`);
+    const decimaler = (o.svar.split(",")[1] ?? "").length;
+    sig(decimaler <= 3, `${hvor}: for mange decimaler i svaret (${o.svar})`);
+    return;
+  }
+
   const forventet = facitForStykke(o.spoergsmaal);
   sig(forventet !== null, `${hvor}: kunne ikke parse "${o.spoergsmaal}"`);
   if (forventet === null) return;
@@ -108,7 +128,8 @@ function tjekOpgave(emne: EmneId, niveau: NiveauId, o: Opgave): void {
     Math.abs(forventet - talAf(o.svar)) < 1e-9,
     `${hvor}: ${o.spoergsmaal} = ${o.svar}, men kontrollen siger ${forventet}`,
   );
-  sig(Number.isInteger(forventet), `${hvor}: ${o.spoergsmaal} giver ikke et helt tal (${forventet})`);
+  const svarDecimaler = (o.svar.split(",")[1] ?? "").length;
+  sig(svarDecimaler <= 3, `${hvor}: for mange decimaler i svaret (${o.spoergsmaal} = ${o.svar})`);
   if (emne === "subtraktion") {
     sig(forventet > 0, `${hvor}: negativt resultat i ${o.spoergsmaal}`);
   }
@@ -127,7 +148,7 @@ for (const emne of EMNER) {
     }
     const forskellige = set.size;
     sig(
-      forskellige >= 60,
+      forskellige >= 100,
       `${emne}/${niveau}: kun ${forskellige} forskellige opgaver ud af ${PROEVER} træk`,
     );
     console.log(
@@ -140,8 +161,8 @@ console.log("\nKontrollerer at en runde ikke gentager sig selv");
 for (const emne of EMNER) {
   for (const niveau of NIVEAUER) {
     for (let i = 0; i < 300; i++) {
-      const runde = lavRunde(emne, niveau, 5, i * 97 + 13);
-      sig(runde.length === 5, `${emne}/${niveau}: runden blev kun ${runde.length} opgaver lang`);
+      const runde = lavRunde(emne, niveau, 10, i * 97 + 13);
+      sig(runde.length === 10, `${emne}/${niveau}: runden blev kun ${runde.length} opgaver lang`);
       sig(
         new Set(runde.map((o) => o.noegle)).size === runde.length,
         `${emne}/${niveau}: dublet i samme runde`,

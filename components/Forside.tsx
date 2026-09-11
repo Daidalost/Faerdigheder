@@ -11,7 +11,7 @@ import {
   nulstil,
   type Fremskridt,
 } from "@/lib/fremskridt";
-import { NIVEAU_RAEKKEFOELGE } from "@/lib/typer";
+import { KRAEVEDE_RIGTIGE, NIVEAU_RAEKKEFOELGE, OPGAVER_PR_RUNDE } from "@/lib/typer";
 import { Medaljer, Statuslinje, Toplinje } from "./Deler";
 import { Pokal } from "./Ikoner";
 
@@ -40,8 +40,9 @@ export default function Forside() {
         </p>
         <h1 className="titel">Færdigheder</h1>
         <p className="manchet">
-          Kortere runder på fem opgaver. Klarer du mindst fire, låser du næste niveau op.
-          Guld ligger på samme niveau som prøven uden hjælpemidler.
+          Runder på {OPGAVER_PR_RUNDE} opgaver. Klarer du mindst {KRAEVEDE_RIGTIGE}, låser du
+          næste niveau op. Guld ligger på samme niveau som prøven uden hjælpemidler — og
+          platin ligger over.
         </p>
 
         <div style={{ marginTop: 22 }}>

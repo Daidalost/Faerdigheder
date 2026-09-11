@@ -1,5 +1,5 @@
 import type { Opgave, NiveauId } from "../typer";
-import { heltal, vaelg, type Rng } from "../tilfaeldig";
+import { dansk, heltal, vaelg, type Rng } from "../tilfaeldig";
 
 /**
  * Division efter mønsteret i FP9 Opgave 5.4.
@@ -41,6 +41,41 @@ function halveringsHint(dividend: number, gange: number): string {
 }
 
 export function lavDivision(rng: Rng, niveau: NiveauId): Opgave {
+  // Platin: seks cifre, tocifrede divisorer, og division med et tal under 1.
+  if (niveau === "platin") {
+    switch (heltal(rng, 1, 3)) {
+      case 1: {
+        const n = 4 * heltal(rng, 3, 60);
+        const d = vaelg(rng, [0.5, 0.25]);
+        return {
+          noegle: `div:${n}/${d}`,
+          slags: "tal",
+          spoergsmaal: `${n} : ${dansk(d, 2)}`,
+          svar: dansk(n / d, 3),
+          strategi: "Divider med under 1",
+          hint: `Du dividerer med et tal under 1, så svaret bliver STØRRE end ${n}. At dividere med ${dansk(d, 2)} er det samme som at gange med ${d === 0.5 ? 2 : 4}.`,
+        };
+      }
+      case 2: {
+        const divisor = vaelg(rng, [11, 12, 15, 25]);
+        const kvotient = 100 * heltal(rng, 1, 9) + heltal(rng, 1, 9);
+        const dividend = kvotient * divisor;
+        return opgave(
+          dividend,
+          divisor,
+          "Del tallet op",
+          `Divisoren har to cifre, men tallet kan stadig skæres op: ${dividend} : ${divisor}. Prøv med ${divisor} · 100 = ${divisor * 100} — hvor mange hundreder er der plads til?`,
+        );
+      }
+      default: {
+        const divisor = vaelg(rng, [3, 4, 6, 7, 8, 9]);
+        const kvotient = 10000 * heltal(rng, 1, 9) + heltal(rng, 1, 99);
+        const dividend = kvotient * divisor;
+        return opgave(dividend, divisor, "Del tallet op", opdelHint(dividend, divisor));
+      }
+    }
+  }
+
   if (niveau === "bronze") {
     if (heltal(rng, 1, 2) === 1) {
       const divisor = vaelg(rng, [2, 3, 4]);

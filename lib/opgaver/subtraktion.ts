@@ -28,6 +28,33 @@ function taelOpHint(a: number, b: number): string {
 }
 
 export function lavSubtraktion(rng: Rng, niveau: NiveauId): Opgave {
+  // Platin: fem cifre, og differenser der kræver et kig før man regner.
+  if (niveau === "platin") {
+    switch (heltal(rng, 1, 3)) {
+      case 1: {
+        const rundt = 10000 * heltal(rng, 1, 5);
+        const b = rundt - heltal(rng, 1, 8);
+        const a = b + heltal(rng, 3000, 30000);
+        return opgave(a, b, "Rund op, og læg tilbage", rundOpHint(b, rundt));
+      }
+      case 2: {
+        const a = heltal(rng, 20002, 90008);
+        const b = a - heltal(rng, 8, 45);
+        return opgave(a, b, "Tæl op i stedet", taelOpHint(a, b));
+      }
+      default: {
+        const a = 10000 * heltal(rng, 3, 9);
+        const b = heltal(rng, 2103, 9897);
+        return opgave(
+          a,
+          b,
+          "Tæl op til det runde tal",
+          `Tæl op fra ${b}: først til ${Math.ceil(b / 1000) * 1000}, og derfra videre til ${a}. To spring i stedet for en lang opstilling.`,
+        );
+      }
+    }
+  }
+
   if (niveau === "bronze") {
     switch (heltal(rng, 1, 3)) {
       case 1: {

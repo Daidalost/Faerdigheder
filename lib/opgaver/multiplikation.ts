@@ -1,5 +1,5 @@
 import type { Opgave, NiveauId } from "../typer";
-import { heltal, vaelg, type Rng } from "../tilfaeldig";
+import { dansk, heltal, vaelg, type Rng } from "../tilfaeldig";
 
 /**
  * Multiplikation efter mønsteret i FP9 Opgave 5.3.
@@ -39,6 +39,62 @@ function femogtyveHint(n: number): string {
 }
 
 export function lavMultiplikation(rng: Rng, niveau: NiveauId): Opgave {
+  // Platin: halvering og fordobling, decimalfaktorer, og kompensation i to cifre.
+  if (niveau === "platin") {
+    switch (heltal(rng, 1, 4)) {
+      case 1: {
+        // Halvér den ene, fordobl den anden — indtil det ene tal bliver rundt
+        const a = vaelg(rng, [15, 25, 35, 45, 55, 65]);
+        const b = 4 * heltal(rng, 3, 24);
+        return opgave(
+          [a, b],
+          "Halvér og fordobl",
+          `Halvér det ene tal og fordobl det andet — produktet er det samme: ${a} · ${b} = ${a * 2} · ${b / 2} = ${a * 4} · ${b / 4}. Bliv ved, til det ene tal er rundt.`,
+        );
+      }
+      case 2: {
+        // Gange med et decimaltal under 1
+        const n = 4 * heltal(rng, 4, 60);
+        const f = vaelg(rng, [0.5, 0.25, 0.75]);
+        const navn = f === 0.5 ? "halvdelen" : f === 0.25 ? "en fjerdedel" : "tre fjerdedele";
+        return {
+          noegle: `mul:${n}*${f}`,
+          slags: "tal",
+          spoergsmaal: `${n} · ${dansk(f, 2)}`,
+          svar: dansk(n * f, 3),
+          strategi: "Gange med under 1",
+          hint: `At gange med ${dansk(f, 2)} er at tage ${navn} af tallet. Svaret bliver MINDRE end ${n}.`,
+        };
+      }
+      case 3: {
+        // Tocifret kompensation
+        const a = vaelg(rng, [19, 29, 39, 49, 18, 28, 48]);
+        const oprundet = Math.ceil(a / 10) * 10;
+        const b = heltal(rng, 12, 89);
+        return opgave(
+          [a, b],
+          "Rund op, og træk fra",
+          `${a} er ${oprundet} − ${oprundet - a}. Regn ${oprundet} · ${b} = ${oprundet * b}, og træk så ${oprundet - a} · ${b} = ${(oprundet - a) * b} fra.`,
+        );
+      }
+      default: {
+        // Tre faktorer, hvor to giver 1000
+        const n = heltal(rng, 12, 98);
+        const par = vaelg(rng, [
+          [8, 125],
+          [4, 250],
+          [2, 500],
+          [40, 25],
+        ]);
+        return opgave(
+          [par[0], n, par[1]],
+          "Byt om på faktorerne",
+          `${par[0]} · ${par[1]} = ${par[0] * par[1]}. Tag det par først, så er der bare ${n} · ${par[0] * par[1]} tilbage.`,
+        );
+      }
+    }
+  }
+
   if (niveau === "bronze") {
     switch (heltal(rng, 1, 6)) {
       case 1: {

@@ -30,6 +30,33 @@ function parHint(a: number, b: number): string {
 }
 
 export function lavAddition(rng: Rng, niveau: NiveauId): Opgave {
+  // Platin: over prøveniveau. Tre led, eller fem cifre i begge tal.
+  if (niveau === "platin") {
+    if (heltal(rng, 1, 2) === 1) {
+      const a = heltal(rng, 1200, 8800);
+      const b = heltal(rng, 1150, 4850);
+      const c = 1000 * heltal(rng, 1, 4) + (1000 - (b % 1000));
+      return {
+        noegle: `add:${a}+${b}+${c}`,
+        slags: "tal",
+        spoergsmaal: `${a} + ${b} + ${c}`,
+        svar: String(a + b + c),
+        strategi: "Find parret først",
+        hint: `Tag ikke leddene i rækkefølge. ${b} og ${c} giver tilsammen det runde tal ${b + c}. Læg ${a} til bagefter.`,
+      };
+    }
+    const a = 10000 * heltal(rng, 1, 5) - heltal(rng, 1, 6);
+    const b = 10000 * heltal(rng, 1, 4) - heltal(rng, 1, 6);
+    return {
+      noegle: `add:${a}+${b}`,
+      slags: "tal",
+      spoergsmaal: `${a} + ${b}`,
+      svar: String(a + b),
+      strategi: "Rund begge op",
+      hint: `Begge tal ligger lige under et helt ti-tusind. Læg de runde tal sammen, og træk så ${10000 * Math.ceil(a / 10000) - a} + ${10000 * Math.ceil(b / 10000) - b} fra.`,
+    };
+  }
+
   if (niveau === "bronze") {
     switch (heltal(rng, 1, 4)) {
       case 1: {

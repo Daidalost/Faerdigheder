@@ -12,12 +12,13 @@ import {
 } from "@/lib/fremskridt";
 import { NIVEAUER, OPGAVER_PR_RUNDE, KRAEVEDE_RIGTIGE } from "@/lib/typer";
 import { Statuslinje, Tilbage, Toplinje } from "./Deler";
-import { Laas, Medalje, Pokal } from "./Ikoner";
+import { Diamant, Laas, Medalje, Pokal } from "./Ikoner";
 
 const MAERKEFARVE: Record<string, string> = {
   bronze: "var(--bronze-farve)",
   soelv: "var(--soelv-farve)",
   guld: "var(--guld-farve)",
+  platin: "var(--platin-farve)",
 };
 
 export default function EmneSide({ kategori, emne }: { kategori: Kategori; emne: Emne }) {
@@ -57,6 +58,8 @@ export default function EmneSide({ kategori, emne }: { kategori: Kategori; emne:
                 >
                   {!aaben ? (
                     <Laas stoerrelse={24} />
+                  ) : niveau.id === "platin" ? (
+                    <Diamant stoerrelse={40} daempet={!klaret} svaever={klaret} />
                   ) : niveau.id === "guld" ? (
                     <Pokal stoerrelse={40} daempet={!klaret} svaever={klaret} />
                   ) : (

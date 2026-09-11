@@ -1,12 +1,15 @@
-export type NiveauId = "bronze" | "soelv" | "guld";
-export type KategoriId = "regnearterne" | "enhedsomregning";
+export type NiveauId = "bronze" | "soelv" | "guld" | "platin";
+export type KategoriId = "regnearterne" | "enhedsomregning" | "procentogbroek";
 export type EmneId =
   | "addition"
   | "subtraktion"
   | "multiplikation"
   | "division"
   | "omregning"
-  | "vurdering";
+  | "vurdering"
+  | "skrivemaader"
+  | "procentregning"
+  | "sammenlign";
 
 /** En enkelt opgave, klar til at blive vist. */
 export type Opgave = {
@@ -14,11 +17,14 @@ export type Opgave = {
   noegle: string;
   /** "tal" = eleven skriver et tal. "valg" = eleven vælger mellem svarmuligheder. */
   slags: "tal" | "valg";
-  /** Selve spørgsmålet. Regnestykker står her som ren tekst, fx "3498 + 1996". */
+  /**
+   * Selve spørgsmålet. Brøker skrives som "3/5" og bliver sat med brøkstreg,
+   * når de vises — så det ligner prøvesættene.
+   */
   spoergsmaal: string;
   /** Lille tekst før spørgsmålet, fx "Hvad er størst?" */
   optakt?: string;
-  /** Vises efter indtastningsfeltet, fx "m" eller "kr." */
+  /** Vises efter indtastningsfeltet, fx "kr." eller "%" */
   enhed?: string;
   /** Det korrekte svar, som det skal vises for eleven. */
   svar: string;
@@ -40,10 +46,15 @@ export const NIVEAUER: Niveau[] = [
   { id: "bronze", navn: "Bronze", beskrivelse: "Kom i gang. Små tal, tydelige strategier." },
   { id: "soelv", navn: "Sølv", beskrivelse: "Større tal og decimaler." },
   { id: "guld", navn: "Guld", beskrivelse: "Samme niveau som afgangsprøven." },
+  {
+    id: "platin",
+    navn: "Platin",
+    beskrivelse: "Over prøveniveau. Flere trin, og ingen pæne tal at læne sig op ad.",
+  },
 ];
 
-export const NIVEAU_RAEKKEFOELGE: NiveauId[] = ["bronze", "soelv", "guld"];
+export const NIVEAU_RAEKKEFOELGE: NiveauId[] = ["bronze", "soelv", "guld", "platin"];
 
 /** Antal opgaver i en runde, og hvor mange der skal være rigtige for at låse op. */
-export const OPGAVER_PR_RUNDE = 5;
-export const KRAEVEDE_RIGTIGE = 4;
+export const OPGAVER_PR_RUNDE = 10;
+export const KRAEVEDE_RIGTIGE = 8;

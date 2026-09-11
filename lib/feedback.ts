@@ -45,14 +45,15 @@ export function opsamling(
   varAlleredeKlaret: boolean,
 ): Opsamling {
   const bestaaet = rigtige >= KRAEVEDE_RIGTIGE;
+  const mangler = KRAEVEDE_RIGTIGE - rigtige;
 
   if (rigtige === OPGAVER_PR_RUNDE) {
     return {
       bestaaet,
-      overskrift: "Alle fem rigtige",
+      overskrift: `Alle ${OPGAVER_PR_RUNDE} rigtige`,
       tekst: naesteNiveauNavn
         ? `Fejlfrit. ${naesteNiveauNavn} er låst op — tallene bliver større, men strategierne er de samme.`
-        : "Fejlfrit på guld. Det her er præcis niveauet til prøven uden hjælpemidler.",
+        : "Fejlfrit på platin. Det her ligger over prøveniveau, så der er ikke mere at komme efter her.",
     };
   }
 
@@ -63,26 +64,27 @@ export function opsamling(
       tekst: naesteNiveauNavn
         ? `Det er nok til at gå videre. ${naesteNiveauNavn} er låst op.`
         : varAlleredeKlaret
-          ? "Guld er stadig i hus. Kør en runde mere, hvis du vil have farten op."
-          : "Guld er i hus.",
+          ? "Platin er stadig i hus. Kør en runde mere, hvis du vil have farten op."
+          : "Platin er i hus. Længere op kommer du ikke i den her kategori.",
     };
   }
 
-  if (rigtige === 3) {
+  // Under grænsen — sig hvor langt der er, og hvad der er værd at kigge på
+  if (mangler <= 2) {
     return {
       bestaaet,
-      overskrift: "3 ud af 5 — tæt på",
-      tekst: `Der mangler kun én. Kig på de to, der gik galt: var det strategien eller regnestykket, der drillede? Du skal have ${KRAEVEDE_RIGTIGE} for at låse op.`,
+      overskrift: `${rigtige} ud af ${OPGAVER_PR_RUNDE} — tæt på`,
+      tekst: `Der mangler kun ${mangler === 1 ? "én" : "to"}. Kig på dem, der gik galt: var det strategien eller selve regnestykket, der drillede? Du skal bruge ${KRAEVEDE_RIGTIGE} for at låse op.`,
     };
   }
 
-  if (rigtige <= 1) {
+  if (rigtige <= 3) {
     return {
       bestaaet,
       overskrift: `${rigtige} ud af ${OPGAVER_PR_RUNDE} rigtige`,
       tekst:
         niveau === "bronze"
-          ? "Tag den roligt og læs hintet under hver opgave, før du svarer på den næste. Strategien er vigtigere end farten her."
+          ? "Tag den roligt, og læs hintet under hver opgave, før du svarer på den næste. Strategien er vigtigere end farten her."
           : "Prøv et niveau ned og få strategien til at sidde først. Så bliver det her nemt bagefter.",
     };
   }
@@ -90,6 +92,6 @@ export function opsamling(
   return {
     bestaaet,
     overskrift: `${rigtige} ud af ${OPGAVER_PR_RUNDE} rigtige`,
-    tekst: `Du skal bruge ${KRAEVEDE_RIGTIGE} for at låse op. Kør en runde mere — du får nye opgaver.`,
+    tekst: `Du skal bruge ${KRAEVEDE_RIGTIGE} for at låse op — der mangler ${mangler}. Kør en runde mere; du får nye opgaver.`,
   };
 }

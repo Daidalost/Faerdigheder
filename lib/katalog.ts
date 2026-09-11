@@ -88,6 +88,40 @@ export const KATALOG: Kategori[] = [
       },
     ],
   },
+  {
+    id: "procentogbroek",
+    navn: "Procent og brøk",
+    beskrivelse:
+      "Det samme tal skrevet på tre måder — og hvad man kan regne med det. Fire til seks delopgaver i hvert eneste prøvesæt, spredt ud over hele prøven.",
+    farve: "var(--lilla)",
+    farveLys: "var(--lilla-lys)",
+    emner: [
+      {
+        id: "skrivemaader",
+        navn: "Brøk, decimaltal og procent",
+        kort: "Samme tal, tre skrivemåder. Kan du skifte mellem dem uden at tælle på fingre?",
+        farve: "var(--lilla)",
+        farveLys: "var(--lilla-lys)",
+        guldSvarerTil: 'Opgave 7: "Skriv 60 % som en brøk"',
+      },
+      {
+        id: "procentregning",
+        navn: "Procentregning",
+        kort: "Procent af et beløb, rabat, og den baglæns: hvor stort var det hele?",
+        farve: "var(--terra)",
+        farveLys: "var(--terra-lys)",
+        guldSvarerTil: "Opgave 1.3: rabat — i hvert eneste sæt",
+      },
+      {
+        id: "sammenlign",
+        navn: "Sammenlign",
+        kort: "Hvad er størst? Og hvad ligger imellem to brøker?",
+        farve: "var(--teal)",
+        farveLys: "var(--teal-lys)",
+        guldSvarerTil: 'Opgave 10: "Hvilken brøk er større end 1?"',
+      },
+    ],
+  },
 ];
 
 export function findKategori(id: string): Kategori | undefined {

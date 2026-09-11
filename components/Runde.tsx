@@ -4,13 +4,13 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Emne, Kategori } from "@/lib/katalog";
 import type { Niveau, Opgave } from "@/lib/typer";
-import { NIVEAU_RAEKKEFOELGE, OPGAVER_PR_RUNDE } from "@/lib/typer";
+import { KRAEVEDE_RIGTIGE, NIVEAU_RAEKKEFOELGE, OPGAVER_PR_RUNDE } from "@/lib/typer";
 import { lavRunde } from "@/lib/opgaver";
 import { erTalRigtigt } from "@/lib/tilfaeldig";
 import { gemResultat, laesFremskridt, erGennemfoert } from "@/lib/fremskridt";
 import { opsamling, opmuntring, ros } from "@/lib/feedback";
-import { NIVEAU_NAVN, Tilbage, Toplinje } from "./Deler";
-import { Flamme, Flueben, Kryds, Medalje, Pokal } from "./Ikoner";
+import { NIVEAU_NAVN, Tilbage, Toplinje, Udtryk } from "./Deler";
+import { Diamant, Flamme, Flueben, Kryds, Medalje, Pokal } from "./Ikoner";
 import Konfetti from "./Konfetti";
 
 type Fase = "svarer" | "bedoemt" | "faerdig";
@@ -124,7 +124,7 @@ export default function Runde({
 
   // ------------------------------------------------------------------ slut
   if (fase === "faerdig") {
-    const bestod = rigtige >= 4;
+    const bestod = rigtige >= KRAEVEDE_RIGTIGE;
     const laastOp = bestod && naesteNiveauId ? NIVEAU_NAVN[naesteNiveauId] : null;
     const o = opsamling(rigtige, niveau.id, laastOp, varKlaretFoer);
     return (
@@ -137,11 +137,15 @@ export default function Runde({
 
             <div className="opsamlingPokal opsamlingTrofae">
               {bestod ? (
-                niveau.id === "guld" ? (
+                niveau.id === "platin" ? (
+                  <Diamant stoerrelse={86} svaever />
+                ) : niveau.id === "guld" ? (
                   <Pokal stoerrelse={86} svaever />
                 ) : (
                   <Medalje niveau={niveau.id} stoerrelse={86} glimt />
                 )
+              ) : niveau.id === "platin" ? (
+                <Diamant stoerrelse={86} daempet />
               ) : (
                 <Medalje niveau={niveau.id} stoerrelse={86} daempet />
               )}
@@ -201,7 +205,7 @@ export default function Runde({
             </h1>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            {stime >= 2 && (
+            {stime >= 3 && (
               <span className="stime" key={stime}>
                 <Flamme stoerrelse={15} />
                 {stime} i træk
@@ -231,10 +235,14 @@ export default function Runde({
             <p style={{ color: "var(--blaek-lys)" }}>Henter opgaver …</p>
           ) : (
             <>
-              {opgave.optakt && <p className="optakt">{opgave.optakt}</p>}
-              <p className={`stykke ${opgave.slags === "valg" ? "tekst" : ""}`}>
-                {opgave.spoergsmaal}
-              </p>
+              {opgave.optakt && (
+                <p className={opgave.spoergsmaal ? "optakt" : "optakt stor"}>{opgave.optakt}</p>
+              )}
+              {opgave.spoergsmaal && (
+                <p className={`stykke ${opgave.slags === "valg" ? "tekst" : ""}`}>
+                  <Udtryk tekst={opgave.spoergsmaal} />
+                </p>
+              )}
 
               {opgave.slags === "tal" ? (
                 <form
@@ -290,7 +298,7 @@ export default function Runde({
                           disabled={fase !== "svarer"}
                           onClick={() => bedoem(v)}
                         >
-                          {v}
+                          <Udtryk tekst={v} />
                         </button>
                       );
                     })}
@@ -313,10 +321,15 @@ export default function Runde({
                   <span className="feedbackTekst">
                     <strong>{sidsteVarRigtigt ? ros(nr) : opmuntring(nr)}</strong>
                     <span className="strategimaerke">{opgave.strategi}</span>
-                    <div>{opgave.hint}</div>
+                    <div>
+                      <Udtryk tekst={opgave.hint} />
+                    </div>
                     {!sidsteVarRigtigt && (
                       <div className="facitlinje">
-                        Svaret er <strong style={{ display: "inline" }}>{opgave.svar}</strong>
+                        Svaret er{" "}
+                        <strong style={{ display: "inline" }}>
+                          <Udtryk tekst={opgave.svar} />
+                        </strong>
                         {opgave.enhed ? ` ${opgave.enhed}` : ""}.
                       </div>
                     )}

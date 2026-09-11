@@ -27,6 +27,7 @@
   --bronze-farve: #b06a3b;
   --soelv-farve: #7d8b98;
   --guld-farve: #c9911f;
+  --platin-farve: #3e93b4;
 
   --groen: #2c7f5a;
   --groen-lys: #ddf0e7;
@@ -772,4 +773,44 @@ a.kort:hover .niveauMaerke {
   .tegnes {
     stroke-dashoffset: 0;
   }
+}
+
+/* --- Brøker sat med brøkstreg, som i prøvesættene --------------------- */
+.broek {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: -0.42em;
+  line-height: 1.06;
+  margin: 0 0.14em;
+  font-variant-numeric: normal;
+}
+.broek .t {
+  border-bottom: 0.075em solid currentColor;
+  padding: 0 0.2em 0.02em;
+}
+.broek .n {
+  padding: 0.02em 0.2em 0;
+}
+
+/* Når spørgsmålet står i optakten, skal den bære vægten */
+.optakt.stor {
+  font-size: clamp(17px, 3vw, 21px);
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 600;
+  color: var(--blaek);
+  margin-bottom: 2px;
+}
+
+/* Ti prikker skal kunne brydes på små skærme */
+.prikker {
+  flex-wrap: wrap;
+  max-width: 168px;
+  justify-content: flex-end;
+}
+
+/* Fjerde medalje i rækken */
+.medalje.opnaaet:nth-child(4) {
+  animation-delay: 0.21s;
 }

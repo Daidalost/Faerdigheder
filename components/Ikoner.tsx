@@ -10,6 +10,7 @@ const METAL: Record<NiveauId, { lys: string; mork: string; kant: string; baand: 
   bronze: { lys: "#DE9A5B", mork: "#9C5626", kant: "#7C4319", baand: "#C24E2A" },
   soelv: { lys: "#DFE6EB", mork: "#93A2AF", kant: "#7A8894", baand: "#5B7383" },
   guld: { lys: "#F7D778", mork: "#D19E1C", kant: "#A87A10", baand: "#CE9B24" },
+  platin: { lys: "#CFEFFA", mork: "#4FA3C4", kant: "#2E7D99", baand: "#3E93B4" },
 };
 
 /** Medalje med bånd. Bruges overalt, hvor et niveau skal vises. */
@@ -125,6 +126,57 @@ export function Pokal({
       <path d="M16.5 36 h15 l1.5 5.5 h-18 Z" fill="url(#pokalfyld)" stroke={m.kant} strokeWidth="1.2" />
       <rect x="19" y="31" width="10" height="3" rx="1.4" fill={m.mork} />
       <path d="M20 11 l1.2 2.6 2.8.4 -2 2 .5 2.8 -2.5-1.3 -2.5 1.3 .5-2.8 -2-2 2.8-.4 Z" fill="#fff" opacity="0.75" />
+    </svg>
+  );
+}
+
+/**
+ * Diamant til platin. Bevidst en anden form end medalje og pokal — det
+ * fjerde trin skal ikke ligne "endnu en medalje".
+ */
+export function Diamant({
+  stoerrelse = 40,
+  daempet = false,
+  svaever = false,
+}: {
+  stoerrelse?: number;
+  daempet?: boolean;
+  svaever?: boolean;
+}) {
+  const m = METAL.platin;
+  if (daempet) {
+    return (
+      <svg width={stoerrelse} height={stoerrelse} viewBox="0 0 48 48" aria-hidden focusable="false">
+        <path
+          d="M14 9 h20 l8 11 -18 20 -18 -20 Z M14 9 l-6 11 M34 9 l6 11 M8 20 h32 M19 20 l5 20 M29 20 l-5 20 M19 20 l-5 -11 M29 20 l5 -11"
+          fill="none"
+          stroke="var(--linje)"
+          strokeWidth="1.8"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+  return (
+    <svg
+      width={stoerrelse}
+      height={stoerrelse}
+      viewBox="0 0 48 48"
+      className={svaever ? "svaever" : undefined}
+      aria-hidden
+      focusable="false"
+    >
+      <defs>
+        <linearGradient id="diamantfyld" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#EAF9FF" />
+          <stop offset="45%" stopColor={m.lys} />
+          <stop offset="100%" stopColor={m.mork} />
+        </linearGradient>
+      </defs>
+      <path d="M14 9 h20 l8 11 -18 20 -18 -20 Z" fill="url(#diamantfyld)" stroke={m.kant} strokeWidth="1.3" strokeLinejoin="round" />
+      <path d="M8 20 h32" fill="none" stroke={m.kant} strokeWidth="1" opacity="0.75" />
+      <path d="M19 20 l5 20 M29 20 l-5 20 M19 20 l-5 -11 M29 20 l5 -11" fill="none" stroke={m.kant} strokeWidth="0.9" opacity="0.6" />
+      <path d="M14 9 l5 11 h10 l5 -11" fill="#fff" opacity="0.35" />
     </svg>
   );
 }

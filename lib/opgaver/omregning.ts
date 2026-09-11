@@ -59,6 +59,22 @@ const PAR_SOELV: Par[] = [
   par(minutter, timer, "tid"),
 ];
 
+/** Platin: areal og rumfang, hvor trinet er 100 eller 1000 i stedet for 10. */
+const cm2: Enhed = { navn: "cm²", faktor: 1 };
+const dm2: Enhed = { navn: "dm²", faktor: 100 };
+const m2: Enhed = { navn: "m²", faktor: 10_000 };
+const cm3: Enhed = { navn: "cm³", faktor: 1 };
+const m3: Enhed = { navn: "m³", faktor: 1_000_000 };
+
+const PAR_PLATIN: Par[] = [
+  par(cm2, dm2),
+  par(dm2, m2),
+  par(cm2, m2),
+  par(cm3, L),
+  par(L, m3),
+  par(cm3, m3),
+];
+
 /** Guld: to decimaler og værdier under 1 — som i prøvesættene. */
 const PAR_GULD: Par[] = [
   par(cm, m),
@@ -81,6 +97,12 @@ function retningsHint(fra: Enhed, til: Enhed, kaede: Par["kaede"]): string {
     } med ${Math.max(fra.faktor, til.faktor) / Math.min(fra.faktor, til.faktor)}.`;
   }
   const forhold = Math.max(fra.faktor, til.faktor) / Math.min(fra.faktor, til.faktor);
+  if (fra.navn.includes("²") || fra.navn.includes("³")) {
+    const kvadrat = fra.navn.includes("²");
+    return `${fra.navn} → ${til.navn}. Her er trinet ikke 10. Længdetrinet skal ${
+      kvadrat ? "ganges med sig selv" : "ganges med sig selv to gange"
+    }, så forholdet bliver ${forhold}. Tallet skal blive ${fra.faktor > til.faktor ? "større" : "mindre"}.`;
+  }
   if (fra.faktor > til.faktor) {
     return `${fra.navn} → ${til.navn} går mod højre på trappen, altså til en mindre enhed. Gang med ${forhold} — tallet skal blive større.`;
   }
@@ -101,6 +123,19 @@ function byg(basis: number, fra: Enhed, til: Enhed, kaede: Par["kaede"], strateg
 }
 
 export function lavOmregning(rng: Rng, niveau: NiveauId): Opgave {
+  if (niveau === "platin") {
+    const p = vaelg(rng, PAR_PLATIN);
+    const tiendedel = p.stor.faktor / 10;
+    const basis =
+      rng() < 0.5
+        ? p.stor.faktor * heltal(rng, 1, 9) + tiendedel * heltal(rng, 1, 9)
+        : tiendedel * heltal(rng, 1, 9) * vaelg(rng, [1, 2, 5]);
+    const modHoejre = rng() < 0.5;
+    const fra = modHoejre ? p.stor : p.lille;
+    const til = modHoejre ? p.lille : p.stor;
+    return byg(basis, fra, til, p.kaede, "Areal og rumfang");
+  }
+
   if (niveau === "bronze") {
     const p = vaelg(rng, PAR_BRONZE);
     const basis = p.stor.faktor * heltal(rng, 1, 19);
