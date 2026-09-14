@@ -11,7 +11,7 @@ import {
   nulstil,
   type Fremskridt,
 } from "@/lib/fremskridt";
-import { KRAEVEDE_RIGTIGE, NIVEAU_RAEKKEFOELGE, OPGAVER_PR_RUNDE } from "@/lib/typer";
+import { NIVEAU_RAEKKEFOELGE } from "@/lib/typer";
 import { Medaljer, Statuslinje, Toplinje } from "./Deler";
 import { Pokal } from "./Ikoner";
 
@@ -40,8 +40,8 @@ export default function Forside() {
         </p>
         <h1 className="titel">Færdigheder</h1>
         <p className="manchet">
-          Runder på {OPGAVER_PR_RUNDE} opgaver. Klarer du mindst {KRAEVEDE_RIGTIGE}, låser du
-          næste niveau op. Guld ligger på samme niveau som prøven uden hjælpemidler — og
+          Korte runder, hvor du skal have langt de fleste rigtige for at låse næste
+          niveau op. Guld ligger på samme niveau som prøven uden hjælpemidler — og
           platin ligger over.
         </p>
 
@@ -71,7 +71,9 @@ export default function Forside() {
             >
               <div className="kortHoved">
                 <div>
-                  <p className="kicker">{kategori.emner.length} emner</p>
+                  <p className="kicker">
+                    {kategori.emner.length} emner · {kategori.opgaverPrRunde} opgaver pr. runde
+                  </p>
                   <h2 style={{ marginTop: 4 }}>{kategori.navn}</h2>
                 </div>
               </div>

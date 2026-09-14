@@ -1,8 +1,8 @@
 "use client";
 
 import type { EmneId, KategoriId, NiveauId } from "./typer";
-import { KRAEVEDE_RIGTIGE, NIVEAU_RAEKKEFOELGE, OPGAVER_PR_RUNDE } from "./typer";
-import { KATALOG, findKategori } from "./katalog";
+import { NIVEAU_RAEKKEFOELGE } from "./typer";
+import { KATALOG, EMNER_SKIFTET_TIL_TI, findKategori, kravFor } from "./katalog";
 
 /**
  * Fremskridt gemmes i browserens localStorage, så eleven kan lukke computeren
@@ -11,6 +11,7 @@ import { KATALOG, findKategori } from "./katalog";
  */
 
 const NOEGLE = "faerdighedsapp:fremskridt:v1";
+const VERSION = 2;
 
 export type EmneFremskridt = {
   /** Bedste antal rigtige på hvert niveau. */
@@ -19,19 +20,54 @@ export type EmneFremskridt = {
   runder: Partial<Record<NiveauId, number>>;
 };
 
-export type Fremskridt = Partial<Record<EmneId, EmneFremskridt>>;
+export type Fremskridt = Partial<Record<EmneId, EmneFremskridt>> & { version?: number };
 
 const TOMT: EmneFremskridt = { bedste: {}, runder: {} };
+
+/**
+ * Da omregning og vurdering gik fra 5 til 10 opgaver pr. runde, ville et
+ * gammelt resultat på 4 ud af 5 pludselig ikke længere tælle som klaret.
+ * Her regnes de gamle tal om, så ingen mister et niveau, de har taget.
+ */
+function migrer(data: Fremskridt): Fremskridt {
+  if (data.version === VERSION) return data;
+  const ud: Fremskridt = { ...data, version: VERSION };
+  for (const emne of EMNER_SKIFTET_TIL_TI) {
+    const gammel = ud[emne as EmneId];
+    if (!gammel?.bedste) continue;
+    const krav = kravFor(emne);
+    const nyBedste: Partial<Record<NiveauId, number>> = {};
+    for (const niveau of NIVEAU_RAEKKEFOELGE) {
+      const b = gammel.bedste[niveau];
+      if (b === undefined) continue;
+      // Resultater over 5 er allerede på den nye skala og skal ikke røres.
+      if (b > 5) nyBedste[niveau] = b;
+      else if (b >= 4) nyBedste[niveau] = krav.kraevede; // var klaret, forbliver klaret
+      else nyBedste[niveau] = b * 2; // samme andel på den nye skala
+    }
+    ud[emne as EmneId] = { ...gammel, bedste: nyBedste };
+  }
+  return ud;
+}
 
 export function laesFremskridt(): Fremskridt {
   if (typeof window === "undefined") return {};
   try {
     const raa = window.localStorage.getItem(NOEGLE);
-    if (!raa) return {};
+    if (!raa) return { version: VERSION };
     const data = JSON.parse(raa);
-    return typeof data === "object" && data !== null ? (data as Fremskridt) : {};
+    if (typeof data !== "object" || data === null) return { version: VERSION };
+    const migreret = migrer(data as Fremskridt);
+    if (migreret !== data) {
+      try {
+        window.localStorage.setItem(NOEGLE, JSON.stringify(migreret));
+      } catch {
+        /* ignoreres */
+      }
+    }
+    return migreret;
   } catch {
-    return {};
+    return { version: VERSION };
   }
 }
 
@@ -43,7 +79,7 @@ export function gemResultat(emne: EmneId, niveau: NiveauId, rigtige: number): Fr
     bedste: { ...emnedata.bedste, [niveau]: Math.max(bedsteFoer, rigtige) },
     runder: { ...emnedata.runder, [niveau]: (emnedata.runder[niveau] ?? 0) + 1 },
   };
-  const nyt: Fremskridt = { ...nu, [emne]: opdateret };
+  const nyt: Fremskridt = { ...nu, version: VERSION, [emne]: opdateret };
   try {
     window.localStorage.setItem(NOEGLE, JSON.stringify(nyt));
   } catch {
@@ -61,10 +97,10 @@ export function nulstil(): void {
 }
 
 export function erGennemfoert(f: Fremskridt, emne: EmneId, niveau: NiveauId): boolean {
-  return (f[emne]?.bedste[niveau] ?? 0) >= KRAEVEDE_RIGTIGE;
+  return (f[emne]?.bedste?.[niveau] ?? 0) >= kravFor(emne).kraevede;
 }
 
-/** Bronze er altid åben. Sølv kræver bronze klaret, guld kræver sølv klaret. */
+/** Bronze er altid åben. Sølv kræver bronze klaret, guld kræver sølv, og så videre. */
 export function erLaastOp(f: Fremskridt, emne: EmneId, niveau: NiveauId): boolean {
   const index = NIVEAU_RAEKKEFOELGE.indexOf(niveau);
   if (index <= 0) return true;
@@ -85,7 +121,7 @@ export function naesteNiveau(f: Fremskridt, emne: EmneId): NiveauId {
   for (const niveau of NIVEAU_RAEKKEFOELGE) {
     if (!erGennemfoert(f, emne, niveau)) return niveau;
   }
-  return "guld";
+  return NIVEAU_RAEKKEFOELGE[NIVEAU_RAEKKEFOELGE.length - 1];
 }
 
 export function emneAndel(f: Fremskridt, emne: EmneId): number {
@@ -105,4 +141,4 @@ export function samletAndel(f: Fremskridt): number {
   return alle.reduce((acc, e) => acc + emneAndel(f, e.id), 0) / alle.length;
 }
 
-export { KRAEVEDE_RIGTIGE, OPGAVER_PR_RUNDE, TOMT };
+export { TOMT, kravFor };

@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Emne, Kategori } from "@/lib/katalog";
 import type { Niveau, Opgave } from "@/lib/typer";
-import { KRAEVEDE_RIGTIGE, NIVEAU_RAEKKEFOELGE, OPGAVER_PR_RUNDE } from "@/lib/typer";
+import { NIVEAU_RAEKKEFOELGE } from "@/lib/typer";
+import { kravFor } from "@/lib/katalog";
 import { lavRunde } from "@/lib/opgaver";
 import { erTalRigtigt } from "@/lib/tilfaeldig";
 import { gemResultat, laesFremskridt, erGennemfoert } from "@/lib/fremskridt";
@@ -35,8 +36,11 @@ export default function Runde({
   const feltRef = useRef<HTMLInputElement>(null);
   const naesteRef = useRef<HTMLButtonElement>(null);
 
+  // Rundelængden hører til kategorien — Regnearterne kører stadig med fem.
+  const { opgaver: OPGAVER_PR_RUNDE, kraevede: KRAEVEDE_RIGTIGE } = kravFor(emne.id);
+
   const nyRunde = useCallback(() => {
-    setOpgaver(lavRunde(emne.id, niveau.id));
+    setOpgaver(lavRunde(emne.id, niveau.id, kravFor(emne.id).opgaver));
     setNr(0);
     setFase("svarer");
     setInput("");
@@ -126,7 +130,14 @@ export default function Runde({
   if (fase === "faerdig") {
     const bestod = rigtige >= KRAEVEDE_RIGTIGE;
     const laastOp = bestod && naesteNiveauId ? NIVEAU_NAVN[naesteNiveauId] : null;
-    const o = opsamling(rigtige, niveau.id, laastOp, varKlaretFoer);
+    const o = opsamling(
+      rigtige,
+      niveau.id,
+      laastOp,
+      varKlaretFoer,
+      OPGAVER_PR_RUNDE,
+      KRAEVEDE_RIGTIGE,
+    );
     return (
       <>
         <Toplinje accent={emne.farve} />
@@ -205,7 +216,7 @@ export default function Runde({
             </h1>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            {stime >= 3 && (
+            {stime >= (OPGAVER_PR_RUNDE > 5 ? 3 : 2) && (
               <span className="stime" key={stime}>
                 <Flamme stoerrelse={15} />
                 {stime} i træk

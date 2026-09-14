@@ -10,7 +10,8 @@ import {
   erLaastOp,
   type Fremskridt,
 } from "@/lib/fremskridt";
-import { NIVEAUER, OPGAVER_PR_RUNDE, KRAEVEDE_RIGTIGE } from "@/lib/typer";
+import { NIVEAUER } from "@/lib/typer";
+import { kravFor } from "@/lib/katalog";
 import { Statuslinje, Tilbage, Toplinje } from "./Deler";
 import { Diamant, Laas, Medalje, Pokal } from "./Ikoner";
 
@@ -22,6 +23,7 @@ const MAERKEFARVE: Record<string, string> = {
 };
 
 export default function EmneSide({ kategori, emne }: { kategori: Kategori; emne: Emne }) {
+  const { opgaver: OPGAVER_PR_RUNDE, kraevede: KRAEVEDE_RIGTIGE } = kravFor(emne.id);
   const [f, setF] = useState<Fremskridt>({});
   const [klar, setKlar] = useState(false);
 

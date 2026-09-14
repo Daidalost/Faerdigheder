@@ -1,5 +1,4 @@
 import type { NiveauId } from "./typer";
-import { KRAEVEDE_RIGTIGE, OPGAVER_PR_RUNDE } from "./typer";
 
 /**
  * Feedbacken skal pege på strategien, ikke på eleven. Derfor er rosen kort,
@@ -43,6 +42,8 @@ export function opsamling(
   niveau: NiveauId,
   naesteNiveauNavn: string | null,
   varAlleredeKlaret: boolean,
+  OPGAVER_PR_RUNDE: number,
+  KRAEVEDE_RIGTIGE: number,
 ): Opsamling {
   const bestaaet = rigtige >= KRAEVEDE_RIGTIGE;
   const mangler = KRAEVEDE_RIGTIGE - rigtige;
@@ -78,7 +79,7 @@ export function opsamling(
     };
   }
 
-  if (rigtige <= 3) {
+  if (rigtige <= Math.floor(OPGAVER_PR_RUNDE / 3)) {
     return {
       bestaaet,
       overskrift: `${rigtige} ud af ${OPGAVER_PR_RUNDE} rigtige`,

@@ -55,6 +55,10 @@ export const NIVEAUER: Niveau[] = [
 
 export const NIVEAU_RAEKKEFOELGE: NiveauId[] = ["bronze", "soelv", "guld", "platin"];
 
-/** Antal opgaver i en runde, og hvor mange der skal være rigtige for at låse op. */
+/**
+ * Standard for en runde. Kategorierne kan sætte deres egne tal i
+ * lib/katalog.ts — Regnearterne kører fx stadig med 5 og 4.
+ * Brug kravFor(emneId) alle steder, hvor emnet er kendt.
+ */
 export const OPGAVER_PR_RUNDE = 10;
 export const KRAEVEDE_RIGTIGE = 8;

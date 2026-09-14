@@ -12,6 +12,7 @@
 import { lavRunde, lavEnOpgave } from "../lib/opgaver/index";
 import { lavRng } from "../lib/tilfaeldig";
 import type { EmneId, NiveauId, Opgave } from "../lib/typer";
+import { kravFor } from "../lib/katalog";
 
 const EMNER: EmneId[] = [
   "addition",
@@ -157,12 +158,16 @@ for (const emne of EMNER) {
   }
 }
 
-console.log("\nKontrollerer at en runde ikke gentager sig selv");
+console.log("\nKontrollerer at en runde har den rigtige længde og ingen dubletter");
 for (const emne of EMNER) {
   for (const niveau of NIVEAUER) {
+    const { opgaver } = kravFor(emne);
     for (let i = 0; i < 300; i++) {
-      const runde = lavRunde(emne, niveau, 10, i * 97 + 13);
-      sig(runde.length === 10, `${emne}/${niveau}: runden blev kun ${runde.length} opgaver lang`);
+      const runde = lavRunde(emne, niveau, opgaver, i * 97 + 13);
+      sig(
+        runde.length === opgaver,
+        `${emne}/${niveau}: runden blev ${runde.length} opgaver lang, forventet ${opgaver}`,
+      );
       sig(
         new Set(runde.map((o) => o.noegle)).size === runde.length,
         `${emne}/${niveau}: dublet i samme runde`,

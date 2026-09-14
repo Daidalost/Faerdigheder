@@ -16,12 +16,22 @@ export type Kategori = {
   beskrivelse: string;
   farve: string;
   farveLys: string;
+  /**
+   * Rundelængde og krav sættes pr. kategori, ikke globalt.
+   * Regnearterne blev bygget med fem opgaver og fire rigtige, og de tal
+   * bliver stående — ellers ville elevernes gamle resultater holde op med
+   * at tælle som klaret.
+   */
+  opgaverPrRunde: number;
+  kraevedeRigtige: number;
   emner: Emne[];
 };
 
 export const KATALOG: Kategori[] = [
   {
     id: "regnearterne",
+    opgaverPrRunde: 5,
+    kraevedeRigtige: 4,
     navn: "Regnearterne",
     beskrivelse:
       "Plus, minus, gange og division — hvor det gælder om at finde den smarte vej, ikke om at stille op med mente.",
@@ -64,6 +74,8 @@ export const KATALOG: Kategori[] = [
   },
   {
     id: "enhedsomregning",
+    opgaverPrRunde: 10,
+    kraevedeRigtige: 8,
     navn: "Enhedsomregning",
     beskrivelse:
       "Trappen og fornemmelsen for, hvor stort et tal egentlig er. To sikre point i hver eneste prøve.",
@@ -90,6 +102,8 @@ export const KATALOG: Kategori[] = [
   },
   {
     id: "procentogbroek",
+    opgaverPrRunde: 10,
+    kraevedeRigtige: 8,
     navn: "Procent og brøk",
     beskrivelse:
       "Det samme tal skrevet på tre måder — og hvad man kan regne med det. Fire til seks delopgaver i hvert eneste prøvesæt, spredt ud over hele prøven.",
@@ -133,3 +147,17 @@ export function findEmne(kategoriId: string, emneId: string): Emne | undefined {
 }
 
 export const ALLE_EMNER: Emne[] = KATALOG.flatMap((k) => k.emner);
+
+export type Krav = { opgaver: number; kraevede: number };
+
+/** Hvor mange opgaver en runde i dette emne har, og hvor mange der skal være rigtige. */
+export function kravFor(emneId: string): Krav {
+  const k = KATALOG.find((kat) => kat.emner.some((e) => e.id === emneId));
+  return {
+    opgaver: k?.opgaverPrRunde ?? 10,
+    kraevede: k?.kraevedeRigtige ?? 8,
+  };
+}
+
+/** Emner hvor rundelængden blev ændret fra 5 til 10 undervejs. */
+export const EMNER_SKIFTET_TIL_TI: string[] = ["omregning", "vurdering"];
