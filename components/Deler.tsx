@@ -80,21 +80,36 @@ export function Medaljer({
  * Sætter tekst med rigtige brøkstreger. Alt der ser ud som "3/5" bliver
  * til en stablet brøk — så opgaverne ligner dem i prøvesættene.
  * Division skrives med " : " i appen, så skråstregen er altid en brøk.
+ *
+ * Ligningerne bruger også bogstaver og parenteser i brøken:
+ * "x/5", "6x/4", "12/x" og "(x + 5)/2". Parentesen om tælleren er kun
+ * til for at markere, hvad der står over brøkstregen — den vises ikke.
  */
+const BROEK = /(\([^()]+\)|\d*x|\d+)\/(\d+|x)/g;
+
 export function Udtryk({ tekst }: { tekst: string }) {
-  const dele = tekst.split(/(\d+\/\d+)/g);
+  const dele: { slags: "tekst" | "broek"; t: string; n?: string }[] = [];
+  let sidst = 0;
+  for (const m of tekst.matchAll(BROEK)) {
+    const start = m.index ?? 0;
+    if (start > sidst) dele.push({ slags: "tekst", t: tekst.slice(sidst, start) });
+    const taeller = m[1].startsWith("(") ? m[1].slice(1, -1) : m[1];
+    dele.push({ slags: "broek", t: taeller, n: m[2] });
+    sidst = start + m[0].length;
+  }
+  if (sidst < tekst.length) dele.push({ slags: "tekst", t: tekst.slice(sidst) });
   return (
     <>
-      {dele.map((del, i) => {
-        const m = del.match(/^(\d+)\/(\d+)$/);
-        if (!m) return <span key={i}>{del}</span>;
-        return (
+      {dele.map((del, i) =>
+        del.slags === "tekst" ? (
+          <span key={i}>{del.t}</span>
+        ) : (
           <span className="broek" key={i}>
-            <span className="t">{m[1]}</span>
-            <span className="n">{m[2]}</span>
+            <span className="t">{del.t}</span>
+            <span className="n">{del.n}</span>
           </span>
-        );
-      })}
+        ),
+      )}
     </>
   );
 }

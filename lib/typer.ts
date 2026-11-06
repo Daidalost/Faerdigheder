@@ -1,5 +1,8 @@
 export type NiveauId = "bronze" | "soelv" | "guld" | "platin";
-export type KategoriId = "regnearterne" | "enhedsomregning" | "procentogbroek";
+export type KategoriId =
+  | "regnearterne"
+  | "enhedsomregning"
+  | "procentogbroek";
 export type EmneId =
   | "addition"
   | "subtraktion"
@@ -11,12 +14,49 @@ export type EmneId =
   | "procentregning"
   | "sammenlign";
 
+/** En ret linje y = ax + b, som den tegnes i et koordinatsystem. */
+export type Linje = {
+  a: number;
+  b: number;
+  /** Navnet står ved linjen, fx "l" eller "m". */
+  navn?: string;
+  farve?: "terra" | "blaa" | "teal" | "lilla" | "okker";
+};
+
+/** Et punkt, der markeres med et kryds og et navn. */
+export type Punkt = { x: number; y: number; navn?: string };
+
+/**
+ * En figur, der vises over svarfeltet. Kun de nye emner bruger den —
+ * de gamle opgaver har ingen figur og ser ud præcis som før.
+ */
+export type Figur =
+  | {
+      slags: "koordinatsystem";
+      /** Vinduet: mindste og største x og y. Altid hele tal. */
+      x: [number, number];
+      y: [number, number];
+      linjer?: Linje[];
+      punkter?: Punkt[];
+    }
+  | {
+      slags: "tabel";
+      /** Navnene i første kolonne, fx ["x", "y"] eller ["Længde (m)", "Pris (kr.)"]. */
+      navne: [string, string];
+      x: string[];
+      /** "?" markerer den celle, eleven skal finde. */
+      y: string[];
+    };
+
 /** En enkelt opgave, klar til at blive vist. */
 export type Opgave = {
   /** Bruges til at fjerne dubletter inden for én runde. */
   noegle: string;
-  /** "tal" = eleven skriver et tal. "valg" = eleven vælger mellem svarmuligheder. */
-  slags: "tal" | "valg";
+  /**
+   * "tal" = eleven skriver et tal. "valg" = eleven vælger mellem svarmuligheder.
+   * "punkt" = eleven skriver et koordinatsæt i to felter, ( ; ). Svaret gemmes som "(3;−2)".
+   */
+  slags: "tal" | "valg" | "punkt";
   /**
    * Selve spørgsmålet. Brøker skrives som "3/5" og bliver sat med brøkstreg,
    * når de vises — så det ligner prøvesættene.
@@ -26,6 +66,10 @@ export type Opgave = {
   optakt?: string;
   /** Vises efter indtastningsfeltet, fx "kr." eller "%" */
   enhed?: string;
+  /** Vises foran indtastningsfeltet, fx "x =" */
+  foran?: string;
+  /** Koordinatsystem eller tabel, der hører til opgaven. */
+  figur?: Figur;
   /** Det korrekte svar, som det skal vises for eleven. */
   svar: string;
   /** Svarmuligheder, når slags er "valg". Indeholder altid svar. */

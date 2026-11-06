@@ -49,13 +49,22 @@ export function dansk(tal: number, maxDecimaler = 4): string {
 /**
  * Læser et elevsvar. Accepterer både komma og punktum, mellemrum,
  * og tillader at eleven skriver enheden med ("3 m").
+ * Minus må være både "-" og "−", og en brøk som "1/4" eller "-3/4" læses som tal.
  */
 export function laesTal(input: string): number | null {
   const renset = input
     .replace(/\s/g, "")
+    .replace(/[−–]/g, "-")
     .replace(/,/g, ".")
-    .replace(/[^0-9.+-]/g, "");
+    .replace(/[^0-9.+\-/]/g, "");
   if (renset === "" || renset === "-" || renset === "+") return null;
+  const broek = renset.match(/^([+-]?[0-9.]+)\/([0-9.]+)$/);
+  if (broek) {
+    const t = Number(broek[1]);
+    const n = Number(broek[2]);
+    return Number.isFinite(t) && Number.isFinite(n) && n !== 0 ? t / n : null;
+  }
+  if (renset.includes("/")) return null;
   const n = Number(renset);
   return Number.isFinite(n) ? n : null;
 }
@@ -66,4 +75,16 @@ export function erTalRigtigt(input: string, facit: string): boolean {
   const b = laesTal(facit);
   if (a === null || b === null) return false;
   return Math.abs(a - b) < 1e-9;
+}
+
+/** Et koordinatsæt gemmes som "(3;−2)". Her deles det i de to tal. */
+export function delPunkt(svar: string): [string, string] {
+  const [x = "", y = ""] = svar.replace(/[()\s]/g, "").split(";");
+  return [x, y];
+}
+
+/** Begge koordinater skal være rigtige. */
+export function erPunktRigtigt(inputX: string, inputY: string, facit: string): boolean {
+  const [fx, fy] = delPunkt(facit);
+  return erTalRigtigt(inputX, fx) && erTalRigtigt(inputY, fy);
 }

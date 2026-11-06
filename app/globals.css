@@ -814,3 +814,117 @@ a.kort:hover .niveauMaerke {
 .medalje.opnaaet:nth-child(4) {
   animation-delay: 0.21s;
 }
+
+/* =====================================================================
+   Figurer: koordinatsystem og værditabel (Lineære funktioner, Ligninger)
+   ===================================================================== */
+.figur {
+  margin: 18px 0 4px;
+}
+.figKoordinat {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: var(--skrift-broed), "Carlito", system-ui, sans-serif;
+}
+.figBaggrund {
+  fill: #fff;
+}
+.figGitter {
+  stroke: var(--linje);
+  stroke-width: 0.8;
+}
+.figAkse {
+  stroke: var(--blaek);
+  stroke-width: 1.5;
+}
+.figPil {
+  fill: var(--blaek);
+}
+.figTal {
+  font-size: 12.5px;
+  fill: var(--blaek-lys);
+  font-variant-numeric: tabular-nums;
+}
+.figAkseNavn {
+  font-size: 14px;
+  font-style: italic;
+  fill: var(--blaek);
+}
+.figLinjeNavn {
+  font-size: 16px;
+  font-style: italic;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-width: 4px;
+}
+.figKryds {
+  stroke: var(--blaek);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+.figPunktNavn {
+  font-size: 15px;
+  font-style: italic;
+  font-weight: 700;
+  fill: var(--blaek);
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-width: 4px;
+}
+
+.figTabelRamme {
+  overflow-x: auto;
+}
+.figTabel {
+  border-collapse: collapse;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+  background: #fff;
+}
+.figTabel th,
+.figTabel td {
+  border: 1.5px solid var(--linje);
+  padding: 8px 14px;
+  text-align: center;
+  min-width: 46px;
+}
+.figTabel th {
+  background: color-mix(in srgb, var(--accent) 9%, #fff);
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+.figTabel td.figUkendt {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* Svar som koordinatsæt: ( __ ; __ ) */
+.punktSvar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 30px;
+  color: var(--blaek-lys);
+}
+.svarfelt.lille {
+  width: 96px;
+  text-align: center;
+}
+.svarForan {
+  font-size: 24px;
+  font-style: italic;
+  color: var(--blaek);
+}
+@media (max-width: 560px) {
+  .svarfelt.lille {
+    width: 76px;
+  }
+}
+
+/* En brøk inde i en svarmulighed (y = −½x + 2): brøkstregen skal flugte med minus og x */
+.valgKnap .broek {
+  vertical-align: middle;
+}

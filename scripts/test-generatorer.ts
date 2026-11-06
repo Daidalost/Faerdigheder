@@ -27,6 +27,7 @@ const EMNER: EmneId[] = [
 ];
 const NIVEAUER: NiveauId[] = ["bronze", "soelv", "guld", "platin"];
 
+
 /** Emner hvor spørgsmålet er en sætning og ikke et regnestykke. */
 const TEKSTEMNER: EmneId[] = ["skrivemaader", "procentregning", "sammenlign"];
 
@@ -38,7 +39,14 @@ const sig = (ok: boolean, besked: string) => {
   }
 };
 
-const talAf = (s: string) => Number(s.replace(/\s/g, "").replace(",", "."));
+const talAf = (s: string) => {
+  const r = s.replace(/\s/g, "").replace(/−/g, "-").replace(",", ".");
+  const m = r.match(/^(-?[\d.]+)\/([\d.]+)$/);
+  return m ? Number(m[1]) / Number(m[2]) : Number(r);
+};
+
+
+
 
 /** Regner et regnestykke efter forfra, uden at bruge generatorens facit. */
 function facitForStykke(udtryk: string): number | null {
@@ -101,6 +109,17 @@ function tjekOpgave(emne: EmneId, niveau: NiveauId, o: Opgave): void {
   sig(o.hint.trim().length > 10, `${hvor}: hint mangler eller er for kort`);
   sig(o.strategi.trim().length > 0, `${hvor}: strategi mangler`);
 
+  // Ingen tekst må indeholde rester af en fejlberegning.
+  const al = [o.spoergsmaal, o.optakt ?? "", o.hint, o.svar, ...(o.valg ?? [])].join(" ");
+  sig(!/\bNaN\b|\bundefined\b|Infinity|\bnull\b/.test(al), `${hvor}: fejlberegning i teksten: ${al.slice(0, 160)}`);
+
+  if (o.slags === "punkt") {
+    sig(/^\([^;]+;[^;]+\)$/.test(o.svar), `${hvor}: koordinatsæt skal gemmes som (x;y), fik ${o.svar}`);
+  }
+  if (o.slags !== "valg") {
+    const decimaler = Math.max(...o.svar.split(";").map((d) => (d.replace(")", "").split(",")[1] ?? "").length));
+    sig(decimaler <= 3, `${hvor}: for mange decimaler i svaret (${o.svar})`);
+  }
   if (o.slags === "valg") {
     sig(Array.isArray(o.valg) && o.valg.length >= 2, `${hvor}: for få svarmuligheder`);
     sig(o.valg!.includes(o.svar), `${hvor}: facit er ikke blandt svarmulighederne (${o.spoergsmaal})`);

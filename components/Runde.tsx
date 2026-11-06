@@ -7,12 +7,13 @@ import type { Niveau, Opgave } from "@/lib/typer";
 import { NIVEAU_RAEKKEFOELGE } from "@/lib/typer";
 import { kravFor } from "@/lib/katalog";
 import { lavRunde } from "@/lib/opgaver";
-import { erTalRigtigt } from "@/lib/tilfaeldig";
+import { erPunktRigtigt, erTalRigtigt } from "@/lib/tilfaeldig";
 import { gemResultat, laesFremskridt, erGennemfoert } from "@/lib/fremskridt";
 import { opsamling, opmuntring, ros } from "@/lib/feedback";
 import { NIVEAU_NAVN, Tilbage, Toplinje, Udtryk } from "./Deler";
 import { Diamant, Flamme, Flueben, Kryds, Medalje, Pokal } from "./Ikoner";
 import Konfetti from "./Konfetti";
+import Figur from "./Figur";
 
 type Fase = "svarer" | "bedoemt" | "faerdig";
 
@@ -29,6 +30,8 @@ export default function Runde({
   const [nr, setNr] = useState(0);
   const [fase, setFase] = useState<Fase>("svarer");
   const [input, setInput] = useState("");
+  /** Andet felt, når svaret er et koordinatsæt. */
+  const [inputY, setInputY] = useState("");
   const [valgt, setValgt] = useState<string | null>(null);
   const [resultater, setResultater] = useState<boolean[]>([]);
   const [varKlaretFoer, setVarKlaretFoer] = useState(false);
@@ -44,6 +47,7 @@ export default function Runde({
     setNr(0);
     setFase("svarer");
     setInput("");
+    setInputY("");
     setValgt(null);
     setResultater([]);
     setVisScore(0);
@@ -58,7 +62,7 @@ export default function Runde({
   const opgave = opgaver?.[nr] ?? null;
 
   useEffect(() => {
-    if (fase === "svarer" && opgave?.slags === "tal") feltRef.current?.focus();
+    if (fase === "svarer" && opgave?.slags !== "valg") feltRef.current?.focus();
     if (fase === "bedoemt") naesteRef.current?.focus();
   }, [fase, nr, opgave?.slags]);
 
@@ -76,12 +80,16 @@ export default function Runde({
     (svar: string) => {
       if (!opgave || fase !== "svarer") return;
       const korrekt =
-        opgave.slags === "tal" ? erTalRigtigt(svar, opgave.svar) : svar === opgave.svar;
+        opgave.slags === "tal"
+          ? erTalRigtigt(svar, opgave.svar)
+          : opgave.slags === "punkt"
+            ? erPunktRigtigt(svar, inputY, opgave.svar)
+            : svar === opgave.svar;
       setValgt(svar);
       setResultater((r) => [...r, korrekt]);
       setFase("bedoemt");
     },
-    [opgave, fase],
+    [opgave, fase, inputY],
   );
 
   const videre = useCallback(() => {
@@ -92,6 +100,7 @@ export default function Runde({
     }
     setNr((n) => n + 1);
     setInput("");
+    setInputY("");
     setValgt(null);
     setFase("svarer");
   }, [nr, opgaver]);
@@ -125,6 +134,9 @@ export default function Runde({
   }, [niveau.id]);
 
   const stil = { ["--accent" as string]: emne.farve };
+  // Telefonens taltastatur har ikke altid et minus. I de kategorier, hvor
+  // svaret kan være negativt, får eleven derfor det fulde tastatur.
+  const fuldtTastatur = ["lineaere", "ligninger"].includes(kategori.id);
 
   // ------------------------------------------------------------------ slut
   if (fase === "faerdig") {
@@ -255,7 +267,57 @@ export default function Runde({
                 </p>
               )}
 
-              {opgave.slags === "tal" ? (
+              {opgave.figur && <Figur data={opgave.figur} />}
+
+              {opgave.slags === "punkt" ? (
+                <form
+                  className="svarrække"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (fase === "svarer") {
+                      if (input.trim() === "" || inputY.trim() === "") return;
+                      bedoem(input);
+                    } else {
+                      videre();
+                    }
+                  }}
+                >
+                  <span className="punktSvar">
+                    (
+                    <input
+                      ref={feltRef}
+                      className="svarfelt lille"
+                      inputMode="text"
+                      autoComplete="off"
+                      placeholder="x"
+                      aria-label="x-koordinat"
+                      value={input}
+                      disabled={fase !== "svarer"}
+                      onChange={(e) => setInput(e.target.value)}
+                    />
+                    ;
+                    <input
+                      className="svarfelt lille"
+                      inputMode="text"
+                      autoComplete="off"
+                      placeholder="y"
+                      aria-label="y-koordinat"
+                      value={inputY}
+                      disabled={fase !== "svarer"}
+                      onChange={(e) => setInputY(e.target.value)}
+                    />
+                    )
+                  </span>
+                  <button
+                    ref={naesteRef}
+                    className="knap"
+                    type="submit"
+                    disabled={fase === "svarer" && (!input.trim() || !inputY.trim())}
+                  >
+                    {fase === "svarer" ? "Svar" : "Næste"}
+                  </button>
+                </form>
+              ) : opgave.slags === "tal" ? (
                 <form
                   className="svarrække"
                   onSubmit={(e) => {
@@ -268,10 +330,11 @@ export default function Runde({
                     }
                   }}
                 >
+                  {opgave.foran && <span className="svarForan">{opgave.foran}</span>}
                   <input
                     ref={feltRef}
                     className="svarfelt"
-                    inputMode="decimal"
+                    inputMode={fuldtTastatur ? "text" : "decimal"}
                     autoComplete="off"
                     placeholder="Dit svar"
                     aria-label="Dit svar"
@@ -339,7 +402,15 @@ export default function Runde({
                       <div className="facitlinje">
                         Svaret er{" "}
                         <strong style={{ display: "inline" }}>
-                          <Udtryk tekst={opgave.svar} />
+                          <Udtryk
+                            tekst={
+                              opgave.slags === "punkt"
+                                ? opgave.svar.replace(";", " ; ")
+                                : opgave.foran
+                                  ? `${opgave.foran} ${opgave.svar}`
+                                  : opgave.svar
+                            }
+                          />
                         </strong>
                         {opgave.enhed ? ` ${opgave.enhed}` : ""}.
                       </div>
