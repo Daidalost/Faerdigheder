@@ -3,7 +3,8 @@ export type KategoriId =
   | "regnearterne"
   | "enhedsomregning"
   | "procentogbroek"
-  | "lineaere";
+  | "lineaere"
+  | "ligninger";
 export type EmneId =
   | "addition"
   | "subtraktion"
@@ -16,7 +17,10 @@ export type EmneId =
   | "sammenlign"
   | "aflaes"
   | "forskrift"
-  | "graf";
+  | "graf"
+  | "trin"
+  | "beggesider"
+  | "broekparentes";
 
 /** En ret linje y = ax + b, som den tegnes i et koordinatsystem. */
 export type Linje = {

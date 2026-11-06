@@ -172,6 +172,42 @@ export const KATALOG: Kategori[] = [
       },
     ],
   },
+  {
+    id: "ligninger",
+    opgaverPrRunde: 10,
+    kraevedeRigtige: 8,
+    navn: "Ligninger",
+    beskrivelse:
+      "\"Løs ligningerne\" — tre delopgaver i hvert eneste prøvesæt. Fra 6x = 42 til x på begge sider og brøker.",
+    farve: "var(--okker)",
+    farveLys: "var(--okker-lys)",
+    emner: [
+      {
+        id: "trin",
+        navn: "Ét og to trin",
+        kort: "Gør det modsatte: først plus og minus, så gange og division.",
+        farve: "var(--okker)",
+        farveLys: "var(--okker-lys)",
+        guldSvarerTil: "Delopgave 1 i \"Løs ligningerne\": 7x = 77 og 44 − 3x = 20",
+      },
+      {
+        id: "beggesider",
+        navn: "x på begge sider",
+        kort: "Saml x der, hvor der er flest — så slipper du for minus foran x.",
+        farve: "var(--terra)",
+        farveLys: "var(--terra-lys)",
+        guldSvarerTil: "Delopgave 2 i \"Løs ligningerne\": 3x + 4 = 6x − 5",
+      },
+      {
+        id: "broekparentes",
+        navn: "Brøker og parenteser",
+        kort: "Gang brøken væk, og gang parentesen ud eller divider den fri.",
+        farve: "var(--vand)",
+        farveLys: "var(--vand-lys)",
+        guldSvarerTil: "Delopgave 3 i \"Løs ligningerne\": x/2 + 4 = x − 2 og 5x = 3 · (x + 4)",
+      },
+    ],
+  },
 ];
 
 export function findKategori(id: string): Kategori | undefined {

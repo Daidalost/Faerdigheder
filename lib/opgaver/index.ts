@@ -13,6 +13,7 @@ import { lavSammenlign } from "./sammenlign";
 import { lavAflaes } from "./aflaes";
 import { lavForskrift } from "./forskrift";
 import { lavGraf } from "./graf";
+import { lavTrin, lavBeggeSider, lavBroekParentes } from "./ligninger";
 
 const GENERATORER: Record<EmneId, (rng: Rng, niveau: NiveauId) => Opgave> = {
   addition: lavAddition,
@@ -27,6 +28,9 @@ const GENERATORER: Record<EmneId, (rng: Rng, niveau: NiveauId) => Opgave> = {
   aflaes: lavAflaes,
   forskrift: lavForskrift,
   graf: lavGraf,
+  trin: lavTrin,
+  beggesider: lavBeggeSider,
+  broekparentes: lavBroekParentes,
 };
 
 export function lavEnOpgave(emne: EmneId, niveau: NiveauId, rng: Rng): Opgave {

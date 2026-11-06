@@ -27,10 +27,14 @@ const EMNER: EmneId[] = [
   "aflaes",
   "forskrift",
   "graf",
+  "trin",
+  "beggesider",
+  "broekparentes",
 ];
 const NIVEAUER: NiveauId[] = ["bronze", "soelv", "guld", "platin"];
 
 const LINEAERE: EmneId[] = ["aflaes", "forskrift", "graf"];
+const LIGNINGER: EmneId[] = ["trin", "beggesider", "broekparentes"];
 
 /** Emner hvor spørgsmålet er en sætning og ikke et regnestykke. */
 const TEKSTEMNER: EmneId[] = ["skrivemaader", "procentregning", "sammenlign"];
@@ -168,6 +172,26 @@ const punktAf = (s: string): [number, number] => {
   const [x, y] = s.replace(/[()\s]/g, "").split(";");
   return [talAf(x), talAf(y)];
 };
+
+function tjekLigning(niveau: NiveauId, o: Opgave, hvor: string): void {
+  const dele = o.spoergsmaal.split(" = ");
+  sig(dele.length === 2, `${hvor}: ligningen "${o.spoergsmaal}" har ikke præcis ét lighedstegn`);
+  if (dele.length !== 2) return;
+  const x = talAf(o.svar);
+  try {
+    const v = evaluer(dele[0], x);
+    const h = evaluer(dele[1], x);
+    sig(lig(v, h), `${hvor}: ${o.spoergsmaal} med x = ${o.svar} giver ${v} = ${h}`);
+    // Løsningen skal være entydig: et andet x må ikke også passe.
+    sig(!lig(evaluer(dele[0], x + 1), evaluer(dele[1], x + 1)), `${hvor}: ${o.spoergsmaal} passer også med x + 1`);
+  } catch (e) {
+    sig(false, `${hvor}: ${(e as Error).message}`);
+  }
+  if (niveau !== "platin") {
+    sig(Number.isInteger(x), `${hvor}: ${o.spoergsmaal} har ikke et helt tal som løsning (${o.svar})`);
+  }
+  sig(o.foran === "x =", `${hvor}: mangler "x =" foran feltet`);
+}
 
 /** Præcis én af svarmulighederne opfylder betingelsen — og det er facit. */
 function praeciEn(o: Opgave, hvor: string, ok: (v: string) => boolean, hvad: string): void {
@@ -462,6 +486,9 @@ function tjekOpgave(emne: EmneId, niveau: NiveauId, o: Opgave): void {
   if (o.slags === "punkt") {
     sig(/^\([^;]+;[^;]+\)$/.test(o.svar), `${hvor}: koordinatsæt skal gemmes som (x;y), fik ${o.svar}`);
   }
+  if (LIGNINGER.includes(emne)) {
+    tjekLigning(niveau, o, hvor);
+  }
   if (LINEAERE.includes(emne)) {
     tjekLineaer(o, hvor);
     if (niveau !== "platin" && o.slags !== "valg") {
@@ -473,7 +500,7 @@ function tjekOpgave(emne: EmneId, niveau: NiveauId, o: Opgave): void {
     const decimaler = Math.max(...o.svar.split(";").map((d) => (d.replace(")", "").split(",")[1] ?? "").length));
     sig(decimaler <= 3, `${hvor}: for mange decimaler i svaret (${o.svar})`);
   }
-  if (LINEAERE.includes(emne)) {
+  if (LIGNINGER.includes(emne) || LINEAERE.includes(emne)) {
     if (o.slags === "valg") {
       sig(o.valg!.includes(o.svar), `${hvor}: facit er ikke blandt svarmulighederne (${o.spoergsmaal})`);
       sig(new Set(o.valg).size === o.valg!.length, `${hvor}: ens svarmuligheder (${o.spoergsmaal})`);

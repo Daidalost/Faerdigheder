@@ -74,9 +74,12 @@ scripts/
 
 ### Struktur i appen
 
-**Forside** → to kategorier: Regnearterne og Enhedsomregning.
+**Forside** → fem kategorier: Regnearterne, Enhedsomregning, Procent og brøk,
+Lineære funktioner og Ligninger.
 **Regnearterne** → addition, subtraktion, multiplikation, division.
 **Enhedsomregning** → omregning og vurdering.
+**Lineære funktioner** → aflæs grafen, forskrift og tabel, graf og forskrift.
+**Ligninger** → ét og to trin, x på begge sider, brøker og parenteser.
 Hvert emne har tre niveauer: **bronze → sølv → guld**.
 
 En runde er 5 opgaver. Med mindst 4 rigtige låses næste niveau op.
@@ -198,6 +201,95 @@ Ellers holder det op med at betyde noget.
 Hele animationslaget slår fra af sig selv, hvis eleven har "reducér bevægelse"
 slået til i styresystemet. Der er ingen lyd; i et klasselokale med 26 elever
 er det en fordel.
+
+---
+
+## Lineære funktioner og Ligninger (november 2026)
+
+To nye kategorier, bygget efter en gennemgang af alle 11 prøvesæt uden
+hjælpemidler fra dec 2020 til maj 2026. Samme opbygning som resten:
+10 opgaver pr. runde, 8 rigtige for at låse op, fire niveauer.
+
+| Niveau | Svarer til |
+|---|---|
+| Bronze | 7. klasse |
+| Sølv | 8. klasse |
+| Guld | prøveniveau (FP9 uden hjælpemidler) |
+| Platin | over prøveniveau |
+
+**Til og med guld er alle facit hele tal** (på guld gerne negative, som i
+prøven). Brøk- og kommaløsninger kommer først på platin, og der godkendes
+både `1/4` og `0,25`.
+
+### Lineære funktioner (`lib/opgaver/aflaes.ts`, `forskrift.ts`, `graf.ts`)
+
+| Emne | Hvad | Belæg i prøvesættene |
+|---|---|---|
+| Aflæs grafen | koordinatsæt, skæring med akserne, skæringspunkt mellem to linjer uden for tegningen | dec 20 opg. 13 · dec 21/maj 25/maj 26 opg. 14 · dec 24 opg. 14 |
+| Forskrift og tabel | sæt ind, find a og b, tabel → forskrift, forskrift → tabel, fast pris pr. meter | dec 23 opg. 11 · maj 24 opg. 11 · dec 25 opg. 3 · maj 26 opg. 2–3 |
+| Graf og forskrift | hvilken forskrift passer til grafen eller beskrivelsen | maj 21 opg. 9 · dec 22 opg. 16 · dec 23/dec 24 opg. 17 · dec 25 opg. 14 |
+
+Distraktorerne i "Sæt X" er dem, prøven selv bruger: a og b byttet om,
+forkert fortegn, og koordinaterne sat direkte ind som tal i forskriften.
+
+### Ligninger (`lib/opgaver/ligninger.ts`)
+
+| Emne | Prøvens egne eksempler |
+|---|---|
+| Ét og to trin | 7x = 77 · 5x + 9 = 34 · 44 − 3x = 20 · 75 − 3x = 0 |
+| x på begge sider | 3x + 4 = 6x − 5 · 6x − 32 = −2x · 5x + 4 = 2x − 5 |
+| Brøker og parenteser | 6x/4 + 1 = 4 · x/2 + 4 = x − 2 · 5x = 3 · (x + 4) · 12/x + 3 = 7 |
+
+### Nyt i appen for at kunne vise dem
+
+- **`components/Figur.tsx`** tegner et koordinatsystem (gitter, akser, linjer,
+  punkter) eller en værditabel som SVG/HTML. En opgave får en figur ved at
+  sætte `figur` i `Opgave` (se `lib/typer.ts`). Gamle opgaver har ingen figur
+  og ser ud som før.
+- **Svar som koordinatsæt**: `slags: "punkt"` giver to felter, `( __ ; __ )`,
+  som i prøven. Facit gemmes som `"(3;−2)"`.
+- **`foran`** sætter fx `x =` foran svarfeltet.
+- `Udtryk` sætter nu også `x/5`, `6x/4`, `12/x` og `(x + 5)/2` med brøkstreg.
+- `laesTal` forstår `−` (rigtigt minus) og brøker som `3/4`.
+- I de to nye kategorier får eleven telefonens fulde tastatur, så minus
+  altid er der.
+
+### Kontrol
+
+`npm test` regner også de nye opgaver efter uafhængigt af generatorerne:
+ligninger ved at sætte facit ind på begge sider af lighedstegnet (med en
+selvstændig udregner), lineære opgaver ved at genberegne facit ud fra
+opgavens parametre og tjekke, at **præcis én** svarmulighed passer.
+Tabeller og grafer kontrolleres mod forskriften.
+
+Variation ved 4000 træk:
+
+```
+aflaes          bronze   694   soelv  1456   guld   821   platin  1859
+forskrift       bronze  2567   soelv  2957   guld  1983   platin  3748
+graf            bronze  1219   soelv  1303   guld   707   platin  1799
+trin            bronze  1523   soelv  3382   guld  2535   platin  3443
+beggesider      bronze  1079   soelv  3499   guld  3087   platin  3924
+broekparentes   bronze   867   soelv  2198   guld  1684   platin  2143
+```
+
+### Rul tilbage
+
+Versionen fra før de to kategorier ligger urørt på grenen
+`backup-foer-lineaere`. De nye ting er lagt ind i tre commits
+(infrastruktur, lineære funktioner, ligninger), så de kan fjernes enkeltvis
+med `git revert <commit>` — eller alt på én gang:
+
+```bash
+git checkout main
+git reset --hard backup-foer-lineaere
+git push --force origin main
+```
+
+Vercel bygger automatisk den version, der ligger på `main`. På Vercel kan
+man også gå til **Deployments**, vælge en ældre deployment og trykke
+**Promote to Production** — så er den gamle version online med det samme,
+uden at røre ved koden.
 
 ---
 
