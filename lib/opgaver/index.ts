@@ -10,6 +10,9 @@ import { lavVurdering } from "./vurdering";
 import { lavSkrivemaader } from "./skrivemaader";
 import { lavProcentregning } from "./procentregning";
 import { lavSammenlign } from "./sammenlign";
+import { lavAflaes } from "./aflaes";
+import { lavForskrift } from "./forskrift";
+import { lavGraf } from "./graf";
 
 const GENERATORER: Record<EmneId, (rng: Rng, niveau: NiveauId) => Opgave> = {
   addition: lavAddition,
@@ -21,6 +24,9 @@ const GENERATORER: Record<EmneId, (rng: Rng, niveau: NiveauId) => Opgave> = {
   skrivemaader: lavSkrivemaader,
   procentregning: lavProcentregning,
   sammenlign: lavSammenlign,
+  aflaes: lavAflaes,
+  forskrift: lavForskrift,
+  graf: lavGraf,
 };
 
 export function lavEnOpgave(emne: EmneId, niveau: NiveauId, rng: Rng): Opgave {

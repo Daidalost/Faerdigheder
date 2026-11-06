@@ -136,6 +136,42 @@ export const KATALOG: Kategori[] = [
       },
     ],
   },
+  {
+    id: "lineaere",
+    opgaverPrRunde: 10,
+    kraevedeRigtige: 8,
+    navn: "Lineære funktioner",
+    beskrivelse:
+      "Koordinatsystemet, forskriften y = ax + b, tabeller og grafer. To til tre delopgaver i hvert prøvesæt — oftest som \"Sæt X\".",
+    farve: "var(--teal)",
+    farveLys: "var(--teal-lys)",
+    emner: [
+      {
+        id: "aflaes",
+        navn: "Aflæs grafen",
+        kort: "Koordinatsæt, skæring med akserne, og hvor to linjer mødes — også uden for tegningen.",
+        farve: "var(--teal)",
+        farveLys: "var(--teal-lys)",
+        guldSvarerTil: "Opgave 13/14: koordinatsæt og skæringspunkt mellem to linjer",
+      },
+      {
+        id: "forskrift",
+        navn: "Forskrift og tabel",
+        kort: "Sæt ind i y = ax + b, find a og b i en tabel, og regn på fast pris + pris pr. stk.",
+        farve: "var(--blaa)",
+        farveLys: "var(--blaa-lys)",
+        guldSvarerTil: "Opgave 11: \"Hvilken forskrift har funktionen?\" og opgave 3 om fast pris pr. meter",
+      },
+      {
+        id: "graf",
+        navn: "Graf og forskrift",
+        kort: "Hvilken forskrift passer til grafen — eller til en beskrivelse af linjen?",
+        farve: "var(--lilla)",
+        farveLys: "var(--lilla-lys)",
+        guldSvarerTil: "Opgave 14/16/17: \"Hvilken ligning passer til beskrivelsen?\"",
+      },
+    ],
+  },
 ];
 
 export function findKategori(id: string): Kategori | undefined {

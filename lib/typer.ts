@@ -2,7 +2,8 @@ export type NiveauId = "bronze" | "soelv" | "guld" | "platin";
 export type KategoriId =
   | "regnearterne"
   | "enhedsomregning"
-  | "procentogbroek";
+  | "procentogbroek"
+  | "lineaere";
 export type EmneId =
   | "addition"
   | "subtraktion"
@@ -12,7 +13,10 @@ export type EmneId =
   | "vurdering"
   | "skrivemaader"
   | "procentregning"
-  | "sammenlign";
+  | "sammenlign"
+  | "aflaes"
+  | "forskrift"
+  | "graf";
 
 /** En ret linje y = ax + b, som den tegnes i et koordinatsystem. */
 export type Linje = {
