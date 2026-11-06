@@ -137,6 +137,11 @@ export default function Runde({
   // Telefonens taltastatur har ikke altid et minus. I de kategorier, hvor
   // svaret kan være negativt, får eleven derfor det fulde tastatur.
   const fuldtTastatur = ["lineaere", "ligninger"].includes(kategori.id);
+  // Graf + "Sæt X": svarmulighederne står i en kolonne ved siden af grafen, som i prøven.
+  // I de nye kategorier er lange spørgsmål sætninger, ikke regnestykker — de får tekststørrelse.
+  const erTekst =
+    opgave?.slags === "valg" || (fuldtTastatur && (opgave?.spoergsmaal.length ?? 0) > 34);
+  const sideOmSide = opgave?.slags === "valg" && opgave.figur?.slags === "koordinatsystem";
 
   // ------------------------------------------------------------------ slut
   if (fase === "faerdig") {
@@ -262,12 +267,12 @@ export default function Runde({
                 <p className={opgave.spoergsmaal ? "optakt" : "optakt stor"}>{opgave.optakt}</p>
               )}
               {opgave.spoergsmaal && (
-                <p className={`stykke ${opgave.slags === "valg" ? "tekst" : ""}`}>
+                <p className={`stykke ${erTekst ? "tekst" : ""}`}>
                   <Udtryk tekst={opgave.spoergsmaal} />
                 </p>
               )}
 
-              {opgave.figur && <Figur data={opgave.figur} />}
+              {opgave.figur && !sideOmSide && <Figur data={opgave.figur} />}
 
               {opgave.slags === "punkt" ? (
                 <form
@@ -354,6 +359,8 @@ export default function Runde({
                 </form>
               ) : (
                 <>
+                  <div className={sideOmSide ? "figurOgValg" : undefined}>
+                  {sideOmSide && opgave.figur && <Figur data={opgave.figur} />}
                   <div className="valgListe">
                     {opgave.valg?.map((v) => {
                       const erFacit = v === opgave.svar;
@@ -372,10 +379,13 @@ export default function Runde({
                           disabled={fase !== "svarer"}
                           onClick={() => bedoem(v)}
                         >
-                          <Udtryk tekst={v} />
+                          <span>
+                            <Udtryk tekst={v} />
+                          </span>
                         </button>
                       );
                     })}
+                  </div>
                   </div>
                   {fase === "bedoemt" && (
                     <div style={{ marginTop: 18 }}>

@@ -380,12 +380,9 @@ function tjekLineaer(o: Opgave, hvor: string): void {
         sig(harLinje(a, N(3)), `${hvor}: linjen mangler i figuren`);
         return sig(o.svar === (a > 0 ? "Voksende" : a < 0 ? "Aftagende" : "Vandret"), `${hvor}: forkert facit for a = ${a}`);
       }
-      case "hvilken": {
-        const f = o.spoergsmaal.match(/forskriften (.+)\?$/)![1];
-        const l = somLinje(f);
-        const med = linjerI.filter((m) => lig(m.a, l.a) && lig(m.b, l.b));
-        return sig(med.length === 1 && med[0].navn === o.svar, `${hvor}: ${f} passer ikke entydigt til linje ${o.svar}`);
-      }
+      case "aflaesa":
+        sig(harLinje(N(2), N(3)), `${hvor}: linjen mangler i figuren`);
+        return sig(talAf(o.svar) === N(2), `${hvor}: facit ${o.svar}, a = ${N(2)}`);
       case "mc":
         sig(harLinje(N(2), N(3)), `${hvor}: linjen mangler i figuren`);
         return praeciEn(o, hvor, linjeMed((l) => lig(l.a, N(2)) && lig(l.b, N(3))), "forskrift til grafen");
@@ -482,6 +479,12 @@ function tjekOpgave(emne: EmneId, niveau: NiveauId, o: Opgave): void {
   // Ingen tekst må indeholde rester af en fejlberegning.
   const al = [o.spoergsmaal, o.optakt ?? "", o.hint, o.svar, ...(o.valg ?? [])].join(" ");
   sig(!/\bNaN\b|\bundefined\b|Infinity|\bnull\b/.test(al), `${hvor}: fejlberegning i teksten: ${al.slice(0, 160)}`);
+
+  // Optakten vises med store bogstaver — der må ikke stå matematik i den.
+  // (Står spørgsmålet i optakten, vises den med almindelige bogstaver — så er det fint.)
+  if (o.spoergsmaal.trim()) {
+    sig(!/=|\b[xyab]\b|\d/.test(o.optakt ?? ""), `${hvor}: matematik i optakten "${o.optakt}"`);
+  }
 
   if (o.slags === "punkt") {
     sig(/^\([^;]+;[^;]+\)$/.test(o.svar), `${hvor}: koordinatsæt skal gemmes som (x;y), fik ${o.svar}`);

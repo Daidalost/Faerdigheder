@@ -232,6 +232,14 @@ både `1/4` og `0,25`.
 Distraktorerne i "Sæt X" er dem, prøven selv bruger: a og b byttet om,
 forkert fortegn, og koordinaterne sat direkte ind som tal i forskriften.
 
+Når en "Sæt X"-opgave har en graf, står de fire svarmuligheder i en kolonne
+med afkrydsningsfelter ved siden af grafen (under grafen på mobil).
+"Hvilken forskrift passer til grafen?" er hovedtypen i Graf og forskrift på
+alle niveauer; voksende/aftagende/vandret er kun en lille del af bronze.
+
+Matematik må ikke stå i `optakt` — den vises med store bogstaver
+("Y = AX + B"). Testen fanger det.
+
 ### Ligninger (`lib/opgaver/ligninger.ts`)
 
 | Emne | Prøvens egne eksempler |
@@ -266,8 +274,8 @@ Variation ved 4000 træk:
 
 ```
 aflaes          bronze   694   soelv  1456   guld   821   platin  1859
-forskrift       bronze  2567   soelv  2957   guld  1983   platin  3748
-graf            bronze  1219   soelv  1303   guld   707   platin  1799
+forskrift       bronze  2434   soelv  2899   guld  2068   platin  3622
+graf            bronze   347   soelv   292   guld   605   platin  1585
 trin            bronze  1523   soelv  3382   guld  2535   platin  3443
 beggesider      bronze  1079   soelv  3499   guld  3087   platin  3924
 broekparentes   bronze   867   soelv  2198   guld  1684   platin  2143

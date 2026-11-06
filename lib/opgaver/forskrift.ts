@@ -23,6 +23,13 @@ type Situation = {
   /** Enhed for y. */
   y: string;
   aftagende?: boolean;
+  /**
+   * Tal der giver mening i virkeligheden: startbeløb b, pr.-beløb a og antal x.
+   * Sølv og guld må gå lidt højere end bronze.
+   */
+  b: { min: number; max: number; trin: number };
+  a: { min: number; max: number; trin: number };
+  antal: [number, number];
 };
 
 const SITUATIONER: Situation[] = [
@@ -31,30 +38,54 @@ const SITUATIONER: Situation[] = [
     tekst: (b, a) => `Et el-løbehjul koster ${b} kr. at låse op og ${a} kr. pr. minut.`,
     x: ["minut", "minutter"],
     y: "kr.",
+    b: { min: 5, max: 15, trin: 5 },
+    a: { min: 2, max: 4, trin: 1 },
+    antal: [5, 30],
   },
   {
     id: "taxa",
     tekst: (b, a) => `En taxa koster ${b} kr. i startgebyr og ${a} kr. pr. km.`,
     x: ["km", "km"],
     y: "kr.",
+    b: { min: 30, max: 60, trin: 5 },
+    a: { min: 8, max: 16, trin: 1 },
+    antal: [2, 20],
   },
   {
     id: "limonade",
     tekst: (b, a) => `I en limonadebod koster et medlemskab ${b} kr., og hvert glas koster ${a} kr.`,
     x: ["glas", "glas"],
     y: "kr.",
+    b: { min: 5, max: 20, trin: 5 },
+    a: { min: 2, max: 6, trin: 1 },
+    antal: [2, 12],
   },
   {
     id: "opsparing",
     tekst: (b, a) => `Ida har ${b} kr. i sparegrisen og lægger ${a} kr. i hver uge.`,
     x: ["uge", "uger"],
     y: "kr.",
+    b: { min: 50, max: 400, trin: 50 },
+    a: { min: 20, max: 100, trin: 10 },
+    antal: [2, 15],
   },
   {
     id: "fitness",
     tekst: (b, a) => `Et fitnesscenter koster ${b} kr. i indmeldelse og ${a} kr. pr. måned.`,
     x: ["måned", "måneder"],
     y: "kr.",
+    b: { min: 100, max: 300, trin: 50 },
+    a: { min: 150, max: 300, trin: 25 },
+    antal: [2, 12],
+  },
+  {
+    id: "musik",
+    tekst: (b, a) => `En musikskole koster ${b} kr. i tilmelding og ${a} kr. pr. lektion.`,
+    x: ["lektion", "lektioner"],
+    y: "kr.",
+    b: { min: 100, max: 250, trin: 50 },
+    a: { min: 60, max: 120, trin: 10 },
+    antal: [4, 20],
   },
   {
     id: "data",
@@ -62,6 +93,9 @@ const SITUATIONER: Situation[] = [
     x: ["dag", "dage"],
     y: "GB",
     aftagende: true,
+    b: { min: 10, max: 50, trin: 5 },
+    a: { min: 1, max: 4, trin: 1 },
+    antal: [2, 10],
   },
   {
     id: "lys",
@@ -69,6 +103,9 @@ const SITUATIONER: Situation[] = [
     x: ["time", "timer"],
     y: "cm",
     aftagende: true,
+    b: { min: 15, max: 30, trin: 1 },
+    a: { min: 1, max: 3, trin: 1 },
+    antal: [2, 8],
   },
 ];
 
@@ -133,21 +170,28 @@ function aEllerB(rng: Rng, niveau: NiveauId): Opgave {
   });
 }
 
-function situationTal(rng: Rng, niveau: NiveauId, s: Situation) {
-  if (s.aftagende) {
-    const a = heltal(rng, 2, 5);
-    const x = heltal(rng, 2, 8);
-    const b = a * heltal(rng, x + 2, x + 10);
+const iTrin = (rng: Rng, r: { min: number; max: number; trin: number }) =>
+  r.min + r.trin * heltal(rng, 0, Math.floor((r.max - r.min) / r.trin));
+
+function situationTal(rng: Rng, _niveau: NiveauId, s: Situation) {
+  for (;;) {
+    const a = iTrin(rng, s.a);
+    const b = iTrin(rng, s.b);
+    const x = heltal(rng, s.antal[0], s.antal[1]);
+    // Det, der brænder ned eller bruges, må ikke gå under nul.
+    if (s.aftagende && b - a * x < 1) continue;
     return { a, b, x };
   }
-  const a = niveau === "bronze" ? heltal(rng, 2, 8) : heltal(rng, 2, 15);
-  const b = niveau === "bronze" ? 5 * heltal(rng, 1, 8) : 5 * heltal(rng, 2, 20);
-  const x = heltal(rng, 2, 15);
-  return { a, b, x };
 }
 
 function hverdagFrem(rng: Rng, niveau: NiveauId): Opgave {
-  const s = vaelg(rng, niveau === "bronze" ? SITUATIONER.filter((v) => !v.aftagende) : SITUATIONER);
+  // Bronze holder sig til de situationer, hvor tallene er små.
+  const s = vaelg(
+    rng,
+    niveau === "bronze"
+      ? SITUATIONER.filter((v) => ["loebehjul", "limonade", "opsparing", "taxa"].includes(v.id))
+      : SITUATIONER,
+  );
   const { a, b, x } = situationTal(rng, niveau, s);
   const y = s.aftagende ? b - a * x : b + a * x;
   return talOpgave({
@@ -210,8 +254,8 @@ function manglendeITabel(rng: Rng, niveau: NiveauId): Opgave {
   const svar = a * xs[hul] + b;
   return talOpgave({
     noegle: `forskrift:hul:${a}:${b}:${start}:${hul}`,
-    optakt: "Tabellen viser en lineær funktion",
-    spoergsmaal: "Hvilket tal skal stå på spørgsmålstegnets plads?",
+    optakt: "Tabel",
+    spoergsmaal: "Tabellen viser en lineær funktion. Hvilket tal skal stå på spørgsmålstegnets plads?",
     figur: tabel(
       ["x", "y"],
       xs,
@@ -234,8 +278,8 @@ function abFraTabel(rng: Rng, niveau: NiveauId): Opgave {
   const spoergA = rng() < 0.5;
   return talOpgave({
     noegle: `forskrift:tab${spoergA ? "a" : "b"}:${a}:${b}:${start}:${spring}`,
-    optakt: "Tabellen viser en lineær funktion y = ax + b",
-    spoergsmaal: spoergA ? "Hvad er a?" : "Hvad er b?",
+    optakt: "Tabel",
+    spoergsmaal: `Tabellen viser en lineær funktion y = ax + b. Hvad er ${spoergA ? "a" : "b"}?`,
     figur: tabel(["x", "y"], xs, xs.map((x) => a * x + b)),
     svar: spoergA ? a : b,
     foran: spoergA ? "a =" : "b =",
@@ -313,21 +357,22 @@ function forskriftTilRaekke(rng: Rng): Opgave {
 /** dec 25 opg. 3: fast pris pr. meter. */
 function fastPris(rng: Rng, niveau: NiveauId): Opgave {
   const varer = [
-    { id: "kabel", tekst: "elkabel", enhed: "m", navne: ["Længde (m)", "Pris (kr.)"] as [string, string] },
-    { id: "reb", tekst: "klatrereb", enhed: "m", navne: ["Længde (m)", "Pris (kr.)"] as [string, string] },
-    { id: "slik", tekst: "bland-selv-slik", enhed: "hg", navne: ["Vægt (hg)", "Pris (kr.)"] as [string, string] },
+    { id: "kabel", tekst: "elkabel", enhed: "m", navne: ["Længde (m)", "Pris (kr.)"] as [string, string], pris: [8, 29] },
+    { id: "reb", tekst: "klatrereb", enhed: "m", navne: ["Længde (m)", "Pris (kr.)"] as [string, string], pris: [15, 39] },
+    { id: "slik", tekst: "bland-selv-slik", enhed: "hg", navne: ["Vægt (hg)", "Pris (kr.)"] as [string, string], pris: [8, 16] },
+    { id: "stof", tekst: "gardinstof", enhed: "m", navne: ["Længde (m)", "Pris (kr.)"] as [string, string], pris: [25, 79] },
   ];
   const v = vaelg(rng, varer);
-  const pris = niveau === "guld" ? heltal(rng, 11, 29) : heltal(rng, 3, 12);
+  const pris = heltal(rng, v.pris[0], v.pris[1]);
   const xs = [10, 20, 30, 40, 50];
   const spoergPrStk = rng() < 0.4;
   const k = vaelg(rng, niveau === "guld" ? [15, 25, 35, 45, 5] : [5, 15, 25, 60, 100]);
   return talOpgave({
     noegle: `forskrift:fast:${v.id}:${pris}:${spoergPrStk ? "pr" : k}`,
-    optakt: `Tabellen viser priser på ${v.tekst} til fast pris pr. ${v.enhed}`,
-    spoergsmaal: spoergPrStk
-      ? `Hvad koster ${v.tekst} pr. ${v.enhed}?`
-      : `Hvad koster ${k} ${v.enhed} ${v.tekst}?`,
+    optakt: "Fast pris",
+    spoergsmaal: `Tabellen viser priser på ${v.tekst}, der koster det samme pr. ${v.enhed}. ${
+      spoergPrStk ? `Hvad koster ${v.tekst} pr. ${v.enhed}?` : `Hvad koster ${k} ${v.enhed}?`
+    }`,
     figur: tabel(v.navne, xs, xs.map((x) => pris * x)),
     svar: spoergPrStk ? pris : pris * k,
     enhed: "kr.",
@@ -375,8 +420,8 @@ function ujaevnTabel(rng: Rng): Opgave {
     const hul = heltal(rng, 2, 4);
     return talOpgave({
       noegle: `forskrift:ujaevn:${a}:${b}:${xs.join(",")}:${hul}`,
-      optakt: "Tabellen viser en lineær funktion",
-      spoergsmaal: "Hvilket tal skal stå på spørgsmålstegnets plads?",
+      optakt: "Tabel",
+      spoergsmaal: "Tabellen viser en lineær funktion. Hvilket tal skal stå på spørgsmålstegnets plads?",
       figur: tabel(["x", "y"], xs, ys.map((y, i) => (i === hul ? "?" : y))),
       svar: ys[hul],
       strategi: "Find a — springene i x er ikke ens",
@@ -387,54 +432,68 @@ function ujaevnTabel(rng: Rng): Opgave {
 
 /** To tilbud: hvornår koster de det samme? (Materiale 06, side 5: to taxaselskaber.) */
 function hvornaarLigeDyre(rng: Rng): Opgave {
-  for (;;) {
-    const a1 = heltal(rng, 2, 12);
-    const a2 = a1 + heltal(rng, 1, 6);
-    const x = heltal(rng, 3, 15);
-    const b2 = 5 * heltal(rng, 1, 8);
-    const b1 = b2 + (a2 - a1) * x;
-    if (b1 > 150) continue;
-    const kontekst = vaelg(rng, [
-      {
-        id: "taxa",
-        t: `Taxa Nord koster ${b1} kr. + ${a1} kr. pr. km. Taxa Syd koster ${b2} kr. + ${a2} kr. pr. km.`,
-        e: "km",
-        en: "km",
-        A: "Nord",
-        B: "Syd",
-      },
-      {
-        id: "fitness",
-        t: `Fitness A koster ${b1} kr. i indmeldelse + ${a1} kr. pr. måned. Fitness B koster ${b2} kr. + ${a2} kr. pr. måned.`,
-        e: "måneder",
-        en: "måned",
-        A: "A",
-        B: "B",
-      },
-      {
-        id: "cykel",
-        t: `Udlejer A tager ${b1} kr. + ${a1} kr. pr. time for en cykel. Udlejer B tager ${b2} kr. + ${a2} kr. pr. time.`,
-        e: "timer",
-        en: "time",
-        A: "A",
-        B: "B",
-      },
-    ]);
-    return talOpgave({
-      noegle: `forskrift:lige:${kontekst.id}:${a1}:${b1}:${a2}:${b2}`,
-      optakt: "To tilbud",
-      spoergsmaal: `${kontekst.t} Ved hvor mange ${kontekst.e} koster de to det samme?`,
-      svar: x,
-      enhed: kontekst.e,
-      strategi: "Sæt de to forskrifter lig hinanden",
-      hint: `${a1}x + ${b1} = ${a2}x + ${b2}. ${kontekst.A} starter ${b1 - b2} kr. dyrere, men ${kontekst.B} koster ${a2 - a1} kr. mere pr. ${kontekst.en}. Forskellen er væk efter ${b1 - b2} : ${a2 - a1} = ${x} ${kontekst.e}.`,
-    });
-  }
+  const kontekster = [
+    {
+      id: "taxa",
+      e: "km",
+      en: "km",
+      A: "Taxa Nord",
+      B: "Taxa Syd",
+      pr: [8, 14, 1],
+      forskel: [1, 4, 1],
+      start: [20, 45, 5],
+      antal: [3, 15],
+      t: (b1: number, a1: number, b2: number, a2: number) =>
+        `Taxa Nord koster ${b1} kr. + ${a1} kr. pr. km. Taxa Syd koster ${b2} kr. + ${a2} kr. pr. km.`,
+    },
+    {
+      id: "fitness",
+      e: "måneder",
+      en: "måned",
+      A: "Fitness A",
+      B: "Fitness B",
+      pr: [150, 250, 25],
+      forskel: [25, 75, 25],
+      start: [0, 200, 50],
+      antal: [2, 12],
+      t: (b1: number, a1: number, b2: number, a2: number) =>
+        `Fitness A koster ${b1} kr. i indmeldelse + ${a1} kr. pr. måned. Fitness B koster ${b2} kr. i indmeldelse + ${a2} kr. pr. måned.`,
+    },
+    {
+      id: "cykel",
+      e: "timer",
+      en: "time",
+      A: "Udlejer A",
+      B: "Udlejer B",
+      pr: [20, 40, 5],
+      forskel: [5, 15, 5],
+      start: [0, 50, 10],
+      antal: [2, 8],
+      t: (b1: number, a1: number, b2: number, a2: number) =>
+        `Udlejer A tager ${b1} kr. + ${a1} kr. pr. time for en cykel. Udlejer B tager ${b2} kr. + ${a2} kr. pr. time.`,
+    },
+  ];
+  const k = vaelg(rng, kontekster);
+  const tr = (r: number[]) => iTrin(rng, { min: r[0], max: r[1], trin: r[2] });
+  const a1 = tr(k.pr);
+  const a2 = a1 + tr(k.forskel);
+  const b2 = tr(k.start);
+  const x = heltal(rng, k.antal[0], k.antal[1]);
+  const b1 = b2 + (a2 - a1) * x;
+  return talOpgave({
+    noegle: `forskrift:lige:${k.id}:${a1}:${b1}:${a2}:${b2}`,
+    optakt: "To tilbud",
+    spoergsmaal: `${k.t(b1, a1, b2, a2)} Ved hvor mange ${k.e} koster de to det samme?`,
+    svar: x,
+    enhed: k.e,
+    strategi: "Sæt de to forskrifter lig hinanden",
+    hint: `${a1}x + ${b1} = ${a2}x + ${b2}. ${k.A} starter ${b1 - b2} kr. dyrere, men ${k.B} koster ${a2 - a1} kr. mere pr. ${k.en}. Forskellen er væk efter ${b1 - b2} : ${a2 - a1} = ${x} ${k.e}.`,
+  });
 }
 
 /** Kommatal i prisen, som jordbærplukkeren i maj 26. */
 function kommaPris(rng: Rng): Opgave {
-  const a = vaelg(rng, [7.5, 12.5, 2.5, 4.5, 6.25, 1.25]);
+  const a = vaelg(rng, [7.5, 6.5, 8.5, 5.5, 6.25, 7.25]);
   const b = 25 * heltal(rng, 0, 8);
   let x = 0;
   do x = heltal(rng, 4, 40);

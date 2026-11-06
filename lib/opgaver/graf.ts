@@ -1,5 +1,5 @@
 import type { Linje, NiveauId, Opgave } from "../typer";
-import { heltal, vaelg, type Rng } from "../tilfaeldig";
+import { bland, heltal, vaelg, type Rng } from "../tilfaeldig";
 import { forskrift, ikkeNul, ip, koordinatsystem, punkt, tal, valgOpgave } from "./algebra";
 
 /**
@@ -57,42 +57,13 @@ function voksende(rng: Rng): Opgave {
   };
 }
 
-/** To eller tre linjer i samme koordinatsystem. Hvilken har forskriften …? */
-function hvilkenLinje(rng: Rng, niveau: NiveauId): Opgave {
-  const x: [number, number] = niveau === "bronze" ? [0, 6] : [-4, 5];
-  const y: [number, number] = niveau === "bronze" ? [0, 10] : [-5, 7];
-  const antal = 3;
-  const linjer: Linje[] = [];
-  const farver: Linje["farve"][] = ["terra", "blaa", "teal"];
-  let vagt = 0;
-  while (linjer.length < antal && vagt++ < 500) {
-    const l: Linje =
-      niveau === "bronze"
-        ? { a: heltal(rng, 1, 3), b: heltal(rng, 0, 5) }
-        : { a: ikkeNul(rng, -3, 3), b: heltal(rng, -4, 5) };
-    if (gitter(l, x, y) < 3) continue;
-    if (linjer.some((m) => m.a === l.a || m.b === l.b)) continue;
-    linjer.push({ ...l, navn: NAVNE[linjer.length], farve: farver[linjer.length] });
-  }
-  if (linjer.length < antal) return hvilkenLinje(rng, niveau);
-  const facit = vaelg(rng, linjer);
-  return {
-    noegle: `graf:hvilken:${linjer.map((l) => `${l.a},${l.b}`).join("|")}:${facit.navn}`,
-    slags: "valg",
-    optakt: "Se på graferne",
-    spoergsmaal: `Hvilken af linjerne har forskriften ${forskrift(facit.a, facit.b)}?`,
-    figur: koordinatsystem(x, y, linjer),
-    svar: facit.navn!,
-    valg: linjer.map((l) => l.navn!),
-    strategi: "Start med b",
-    hint: `b = ${tal(facit.b)}, så linjen skal skære y-aksen i ${tal(facit.b)}. Det er kun linje ${facit.navn}, der gør det. Tjek a bagefter: den ${facit.a > 0 ? "stiger" : "falder"} ${tal(Math.abs(facit.a))} for hver gang x vokser med 1.`,
-  };
-}
-
-/** Graf → forskrift. Bronze: kun voksende. Guld: prøvens distraktorer. */
+/**
+ * Graf → forskrift, med svarmulighederne ved siden af grafen.
+ * Det er hovedtypen i emnet. Bronze: kun voksende. Guld: prøvens distraktorer.
+ */
 function grafTilForskrift(rng: Rng, niveau: NiveauId): Opgave {
-  const x: [number, number] = niveau === "bronze" ? [0, 6] : [-3, 5];
-  const y: [number, number] = niveau === "bronze" ? [0, 10] : [-3, 7];
+  const x: [number, number] = niveau === "bronze" ? [0, 6] : [-5, 5];
+  const y: [number, number] = niveau === "bronze" ? [0, 10] : [-5, 5];
   let a = 0;
   let b = 0;
   do {
@@ -101,18 +72,18 @@ function grafTilForskrift(rng: Rng, niveau: NiveauId): Opgave {
       b = heltal(rng, 1, 5);
     } else if (niveau === "soelv") {
       a = ikkeNul(rng, -3, 3);
-      b = ikkeNul(rng, -2, 5);
+      b = ikkeNul(rng, -4, 4);
     } else {
       a = vaelg(rng, [-4, -3, -2, -1, 2, 3, 4]);
-      b = heltal(rng, 1, 6);
+      b = ikkeNul(rng, -4, 4);
     }
-  } while (a === b || gitter({ a, b }, x, y) < 2);
+  } while (Math.abs(a) === Math.abs(b) || gitter({ a, b }, x, y) < 3);
   const andre =
     niveau === "bronze"
       ? [forskrift(b, a), forskrift(a + 1, b), forskrift(a, b + 1), forskrift(a, 0), forskrift(1, b)]
       : niveau === "soelv"
         ? [forskrift(-a, b), forskrift(b, a), forskrift(a, -b), forskrift(-a, -b), forskrift(b, -a)]
-        : [forskrift(b, a), forskrift(-b, -a), forskrift(-a, b), forskrift(1 / a, b), forskrift(a, -b)];
+        : [forskrift(a, -b), forskrift(b, a), forskrift(-a, b), forskrift(-b, -a), forskrift(1 / a, b)];
   const navn = vaelg(rng, NAVNE);
   return valgOpgave(
     {
@@ -121,9 +92,37 @@ function grafTilForskrift(rng: Rng, niveau: NiveauId): Opgave {
       spoergsmaal: `Hvilken ligning beskriver linjen ${navn}?`,
       figur: koordinatsystem(x, y, [{ a, b, navn, farve: "terra" }]),
       svar: forskrift(a, b),
-      andre,
+      andre: bland(rng, andre),
+      antal: 4,
       strategi: "Find b først, så a",
       hint: LINJE_HINT(a, b),
+    },
+    rng,
+  );
+}
+
+/** Bronze: aflæs hældningstallet på grafen. Samme opstilling: graf og fire svar ved siden af. */
+function haeldningFraGraf(rng: Rng): Opgave {
+  const x: [number, number] = [0, 6];
+  const y: [number, number] = [0, 10];
+  let a = 0;
+  let b = 0;
+  do {
+    a = heltal(rng, 1, 4);
+    b = heltal(rng, 0, 5);
+  } while (a === b || gitter({ a, b }, x, y) < 3);
+  const navn = vaelg(rng, NAVNE);
+  return valgOpgave(
+    {
+      noegle: `graf:aflaesa:${a}:${b}:${navn}`,
+      optakt: "Sæt X",
+      spoergsmaal: `Hvor meget stiger linjen ${navn}, hver gang x bliver 1 større?`,
+      figur: koordinatsystem(x, y, [{ a, b, navn, farve: "terra" }]),
+      svar: tal(a),
+      andre: [tal(b), tal(a + 1), tal(a + b), tal(a === 1 ? 3 : a - 1), tal(2 * a)].filter((v) => v !== tal(a)),
+      antal: 4,
+      strategi: "Ét skridt til højre",
+      hint: `Find et sted, hvor linjen rammer et gitterkryds, fx (0 ; ${b}). Gå 1 til højre og se, hvor meget højere linjen er: ${a}. Det er hældningstallet a.`,
     },
     rng,
   );
@@ -311,7 +310,8 @@ function brokHaeldning(rng: Rng): Opgave {
       spoergsmaal: `Hvilken ligning beskriver linjen ${navn}?`,
       figur: koordinatsystem(x, y, [{ a, b, navn, farve: "lilla" }]),
       svar: forskrift(a, b),
-      andre: [forskrift(1 / a, b), forskrift(-a, b), forskrift(a, -b), forskrift(-1 / a, b), forskrift(b, a)],
+      andre: bland(rng, [forskrift(1 / a, b), forskrift(-a, b), forskrift(a, -b), forskrift(-1 / a, b), forskrift(b, a)]),
+      antal: 4,
       strategi: "Find to gitterpunkter på linjen",
       hint: `b = ${tal(b)}. Find to punkter, hvor linjen rammer et gitterkryds præcist. Tæl hvor langt du går til siden, og hvor meget op eller ned: a = (op/ned) : (til siden). Her er a = ${forskriftA(a)}, så ${forskrift(a, b)}.`,
     },
@@ -403,46 +403,25 @@ function akserBroek(rng: Rng): Opgave {
 // -------------------------------------------------------------- samlet
 
 export function lavGraf(rng: Rng, niveau: NiveauId): Opgave {
+  // Graf → forskrift med svarene ved siden af er hovedtypen på alle niveauer.
+  const r = rng();
   if (niveau === "bronze") {
-    switch (heltal(rng, 1, 3)) {
-      case 1:
-        return voksende(rng);
-      case 2:
-        return hvilkenLinje(rng, niveau);
-      default:
-        return grafTilForskrift(rng, niveau);
-    }
+    if (r < 0.6) return grafTilForskrift(rng, niveau);
+    if (r < 0.85) return haeldningFraGraf(rng);
+    return voksende(rng);
   }
   if (niveau === "soelv") {
-    switch (heltal(rng, 1, 4)) {
-      case 1:
-        return grafTilForskrift(rng, niveau);
-      case 2:
-        return enOplysning(rng);
-      case 3:
-        return retLinje(rng);
-      default:
-        return hvilkenLinje(rng, niveau);
-    }
+    if (r < 0.6) return grafTilForskrift(rng, niveau);
+    if (r < 0.8) return enOplysning(rng);
+    return retLinje(rng);
   }
   if (niveau === "guld") {
-    switch (heltal(rng, 1, 3)) {
-      case 1:
-        return grafTilForskrift(rng, niveau);
-      case 2:
-        return beskrivelseGuld(rng);
-      default:
-        return rng() < 0.5 ? beskrivelseGuld(rng) : enOplysning(rng);
-    }
+    if (r < 0.5) return grafTilForskrift(rng, niveau);
+    if (r < 0.8) return beskrivelseGuld(rng);
+    return enOplysning(rng);
   }
-  switch (heltal(rng, 1, 4)) {
-    case 1:
-      return brokHaeldning(rng);
-    case 2:
-      return toVilkaarlige(rng);
-    case 3:
-      return parallelGennem(rng);
-    default:
-      return akserBroek(rng);
-  }
+  if (r < 0.45) return brokHaeldning(rng);
+  if (r < 0.65) return toVilkaarlige(rng);
+  if (r < 0.85) return parallelGennem(rng);
+  return akserBroek(rng);
 }

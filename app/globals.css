@@ -928,3 +928,48 @@ a.kort:hover .niveauMaerke {
 .valgKnap .broek {
   vertical-align: middle;
 }
+
+/* Graf og "Sæt X" ved siden af hinanden, som i prøvehæftet */
+.figurOgValg {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(190px, 1fr);
+  gap: 28px;
+  align-items: center;
+  margin-top: 18px;
+}
+.figurOgValg .figur {
+  margin: 0;
+}
+.figurOgValg .valgListe {
+  grid-template-columns: 1fr;
+  margin-top: 0;
+}
+.figurOgValg .valgKnap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 20px;
+}
+.figurOgValg .valgKnap::before {
+  content: "";
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--blaek-lys);
+  border-radius: 5px;
+  background: #fff;
+}
+.figurOgValg .valgKnap.facit::before {
+  border-color: var(--groen);
+  background: var(--groen) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 10.5l3.2 3.2L15 7' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% no-repeat;
+}
+.figurOgValg .valgKnap.fejl::before {
+  border-color: var(--roed);
+  background: var(--roed) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M6 6l8 8M14 6l-8 8' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% no-repeat;
+}
+@media (max-width: 640px) {
+  .figurOgValg {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
