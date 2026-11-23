@@ -1,4 +1,5 @@
 import type { Figur as FigurData, Linje } from "@/lib/typer";
+import Skitse from "./Skitse";
 
 /**
  * Figurer til opgaverne: et koordinatsystem med gitter, linjer og punkter,
@@ -205,7 +206,13 @@ function Tabel({ data }: { data: Extract<FigurData, { slags: "tabel" }> }) {
 export default function Figur({ data }: { data: FigurData }) {
   return (
     <div className="figur">
-      {data.slags === "koordinatsystem" ? <Koordinatsystem data={data} /> : <Tabel data={data} />}
+      {data.slags === "koordinatsystem" ? (
+        <Koordinatsystem data={data} />
+      ) : data.slags === "skitse" ? (
+        <Skitse data={data} />
+      ) : (
+        <Tabel data={data} />
+      )}
     </div>
   );
 }

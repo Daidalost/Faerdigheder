@@ -973,3 +973,96 @@ a.kort:hover .niveauMaerke {
     gap: 16px;
   }
 }
+
+/* =====================================================================
+   Geometriske skitser (Geometri)
+   ===================================================================== */
+.skitseRamme {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px 32px;
+}
+.skitseRamme .skitse {
+  flex: 1 1 280px;
+}
+.skLinje {
+  stroke: var(--blaek);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  fill: none;
+}
+.skLinje.tynd {
+  stroke-width: 1.1;
+}
+.skLinje.stiplet,
+.skFlade.stiplet {
+  stroke-dasharray: 5 4;
+}
+.skFlade {
+  fill-opacity: 0.16;
+  stroke-width: 1.7;
+  stroke-linejoin: round;
+}
+.skFlade.tom {
+  fill: none;
+}
+.skBue {
+  fill-opacity: 0.22;
+}
+.skBueKant {
+  fill: none;
+  stroke-width: 1.5;
+}
+.skRet {
+  fill: none;
+  stroke: var(--blaek);
+  stroke-width: 1.3;
+}
+.skVinkelTal,
+.skMaal {
+  font-size: 15px;
+  fill: var(--blaek);
+  font-variant-numeric: tabular-nums;
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-width: 3.5px;
+}
+.skVinkelNavn {
+  font-size: 17px;
+  font-style: italic;
+  font-weight: 700;
+  fill: var(--accent, var(--terra));
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-width: 3.5px;
+}
+.skTekst {
+  font-size: 15px;
+  fill: var(--blaek);
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-width: 3.5px;
+}
+.skTekst.kursiv {
+  font-style: italic;
+}
+.skSkitse {
+  font-size: 12px;
+  font-style: italic;
+  fill: var(--blaek-lys);
+}
+.formelboks {
+  flex: 0 1 230px;
+  background: color-mix(in srgb, var(--blaa) 13%, #fff);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--blaek);
+}
+.formelboks .formelHoved {
+  font-size: 19px;
+  text-align: center;
+  margin-bottom: 6px;
+}

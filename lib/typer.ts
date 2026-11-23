@@ -54,7 +54,45 @@ export type Figur =
       x: string[];
       /** "?" markerer den celle, eleven skal finde. */
       y: string[];
-    };
+    }
+  | Skitse;
+
+/** Et punkt i en geometrisk skitse. Matematiske koordinater: y peger opad. */
+export type P = [number, number];
+
+export type Farve = "terra" | "blaa" | "teal" | "lilla" | "okker" | "groen" | "blaek";
+
+/**
+ * En geometrisk skitse: linjer, figurer, vinkelbuer, mål og en formelboks.
+ * Generatorerne regner koordinaterne ud, så tegningen passer med tallene —
+ * en vinkel, der står som 50°, *er* 50° på tegningen.
+ */
+export type Skitse = {
+  slags: "skitse";
+  /** Kvadratnet med tern på 1 × 1 inden for [x0, x1] × [y0, y1]. */
+  gitter?: { x: [number, number]; y: [number, number] };
+  polygoner?: { punkter: P[]; farve?: Farve; fyld?: boolean; stiplet?: boolean }[];
+  linjer?: {
+    fra: P;
+    til: P;
+    farve?: Farve;
+    stiplet?: boolean;
+    tynd?: boolean;
+    /** Små streger midt på linjen, der viser ens længder. */
+    streger?: 1 | 2;
+  }[];
+  /** Ellipser til cylindre. "foran"/"bagved" tegner kun den forreste/bageste halvdel. */
+  ellipser?: { c: P; rx: number; ry: number; halv?: "foran" | "bagved"; stiplet?: boolean }[];
+  /** En vinkel ved `top` mellem strålerne mod `a` og `b` (den mindste af de to). */
+  vinkler?: { top: P; a: P; b: P; tekst?: string; ret?: boolean; farve?: Farve }[];
+  /** Et mål skrevet ved et linjestykke. `side` = 1 til venstre for fra→til, −1 til højre. */
+  maal?: { fra: P; til: P; tekst: string; side?: 1 | -1 }[];
+  tekster?: { ved: P; tekst: string; kursiv?: boolean; anker?: "start" | "middle" | "end" }[];
+  /** Linjer i en formelboks ved siden af skitsen, som i prøvehæftet. */
+  formel?: string[];
+  /** Skriv "Skitse" i hjørnet: målene passer ikke nødvendigvis på tegningen. */
+  skitse?: boolean;
+};
 
 /** En enkelt opgave, klar til at blive vist. */
 export type Opgave = {
