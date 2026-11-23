@@ -74,12 +74,13 @@ scripts/
 
 ### Struktur i appen
 
-**Forside** → fem kategorier: Regnearterne, Enhedsomregning, Procent og brøk,
-Lineære funktioner og Ligninger.
+**Forside** → seks kategorier: Regnearterne, Enhedsomregning, Procent og brøk,
+Lineære funktioner, Ligninger og Geometri.
 **Regnearterne** → addition, subtraktion, multiplikation, division.
 **Enhedsomregning** → omregning og vurdering.
 **Lineære funktioner** → aflæs grafen, forskrift og tabel, graf og forskrift.
 **Ligninger** → ét og to trin, x på begge sider, brøker og parenteser.
+**Geometri** → vinkler, areal og rumfang, ligedannethed.
 Hvert emne har tre niveauer: **bronze → sølv → guld**.
 
 En runde er 5 opgaver. Med mindst 4 rigtige låses næste niveau op.
@@ -298,6 +299,63 @@ Vercel bygger automatisk den version, der ligger på `main`. På Vercel kan
 man også gå til **Deployments**, vælge en ældre deployment og trykke
 **Promote to Production** — så er den gamle version online med det samme,
 uden at røre ved koden.
+
+---
+
+## Geometri (november 2026)
+
+Ny kategori efter en gennemgang af geometridelen i alle 11 prøvesæt
+(dec 2020 – maj 2026). Samme opbygning: 10 opgaver pr. runde, 8 rigtige,
+bronze (7. kl.) – sølv (8. kl.) – guld (prøveniveau) – platin (over).
+**Bronze har hele tal; sølv og guld højst halve tal (som 3,5 m og 7,5 i
+prøven); platin frit.**
+
+| Emne | Hvad | Belæg i prøvesættene |
+|---|---|---|
+| Vinkler | vinkelsum, nabo-/topvinkler, ligebenet, firkant, parallelle linjer, trekant mellem parallelle, trapez, forlængede sider; platin: regulære n-kanter, femkant, uret, ydervinkler | opg. 12/13 i **alle** sæt — fx dec 20 opg. 12, maj 22 opg. 13, dec 22 opg. 13, maj 25 opg. 13, dec 25 opg. 13, maj 26 opg. 13 |
+| Areal og rumfang | rektangel, trekant, parallelogram, trapez (formelboks), kvadratnet, L-figur, fliser/brædder, kasse, kube, cylinder, prisme, pyramide — frem og baglæns; platin: Pythagoras, sideflade, liter, to trin | dec 20 opg. 11/16, maj 21 opg. 14/15, maj 22 opg. 14/15, dec 22 opg. 14/15, dec 23 opg. 15/16, maj 24 opg. 15, dec 24 opg. 15/16, maj 25 opg. 15, dec 25 opg. 15/16, maj 26 opg. 15/16 |
+| Ligedannethed | forstørrelse, "forholdet er 1 : ___", ligedannede trekanter/firkanter, hvilket rektangel er ligedannet, skygger, trekant i trekant, arealet k² og rumfanget k³; platin: baglæns, målestok | dec 20 opg. 14, maj 21 opg. 13, dec 21 opg. 13, maj 22 opg. 12, dec 22 opg. 12, maj 24 opg. 14, maj 25 opg. 16/17, dec 25 opg. 17, maj 26 opg. 16/17 |
+
+Ikke med (endnu): spejling/drejning/parallelforskydning, symmetriakser og
+rosetter, "forfra/fra siden/fra oven" (5 af 11 sæt). Enhedsomregning og
+koordinatsystemet har deres egne kategorier.
+
+### Skitserne
+
+`Figur` har fået en tredje slags, `skitse` (`components/Skitse.tsx`):
+polygoner, linjer (stiplede, med streger for ens sider), vinkelbuer med tal
+eller bogstav, rette vinkler, mål ud for siderne, ellipser til cylindre,
+kvadratnet og en formelboks ved siden af — som i prøvehæftet.
+Generatorerne regner koordinaterne ud (`lib/opgaver/geometri.ts`:
+`polygonFraVinkler`, `trekantFraSider`, `firkantFraSider`), så **tegningen
+passer med tallene**. Tegnefladen vokser med teksterne, så intet bliver
+skåret af.
+
+### Kontrol
+
+Ud over at facit genberegnes fra opgavens parametre, måler testen selve
+tegningen:
+
+- hver vinkelbue måles; "50°" skal være 50°, og buen med bogstavet skal
+  være lige så stor som facit
+- rette vinkler skal være 90°
+- mål som "4,5 cm" på plane figurer skal stå ved en linje, der er 4,5 lang
+- areal og omkreds i kvadratnet og L-figurer regnes ud fra hjørnerne i figuren
+
+```
+vinkler         bronze  1112   soelv  3247   guld  3621   platin  2576
+arealrumfang    bronze  1121   soelv  1962   guld  1665   platin  1148
+ligedannethed   bronze   355   soelv  1518   guld  1980   platin  1399
+```
+
+`KUN=vinkler,ligedannethed npm test` kører kun de nævnte emner.
+
+### Rul tilbage
+
+Versionen fra før Geometri ligger på grenen `backup-foer-geometri`.
+Geometri er lagt ind i to commits (skitser, kategorien), så den kan fjernes
+med `git revert` — eller via Vercel → Deployments → Promote to Production
+på den forrige.
 
 ---
 

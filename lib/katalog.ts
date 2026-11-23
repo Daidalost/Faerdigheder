@@ -208,6 +208,42 @@ export const KATALOG: Kategori[] = [
       },
     ],
   },
+  {
+    id: "geometri",
+    opgaverPrRunde: 10,
+    kraevedeRigtige: 8,
+    navn: "Geometri",
+    beskrivelse:
+      "Vinkler, areal og rumfang, og ligedannede figurer. Fire til seks delopgaver i hvert prøvesæt — altid med en skitse.",
+    farve: "var(--groen)",
+    farveLys: "var(--groen-lys)",
+    emner: [
+      {
+        id: "vinkler",
+        navn: "Vinkler",
+        kort: "Vinkelsum, nabo- og topvinkler, parallelle linjer, trapezer og forlængede sider.",
+        farve: "var(--teal)",
+        farveLys: "var(--teal-lys)",
+        guldSvarerTil: "Opgave 13: \"Størrelsen af vinkel u, v og w\"",
+      },
+      {
+        id: "arealrumfang",
+        navn: "Areal og rumfang",
+        kort: "Trekant, trapez og sammensatte figurer, kasser, prismer, pyramider og cylindre — også baglæns.",
+        farve: "var(--blaa)",
+        farveLys: "var(--blaa-lys)",
+        guldSvarerTil: "Opgave 14–16: formel i boksen, regn frem og baglæns",
+      },
+      {
+        id: "ligedannethed",
+        navn: "Ligedannethed",
+        kort: "Forhold mellem siderne, manglende sider, skygger — og hvor mange gange arealet bliver større.",
+        farve: "var(--lilla)",
+        farveLys: "var(--lilla-lys)",
+        guldSvarerTil: "Opgave 13/14/17: ligedannede figurer i forholdet 1 : 3",
+      },
+    ],
+  },
 ];
 
 export function findKategori(id: string): Kategori | undefined {

@@ -139,8 +139,11 @@ export default function Runde({
   const fuldtTastatur = ["lineaere", "ligninger"].includes(kategori.id);
   // Graf + "Sæt X": svarmulighederne står i en kolonne ved siden af grafen, som i prøven.
   // I de nye kategorier er lange spørgsmål sætninger, ikke regnestykker — de får tekststørrelse.
+  const nyKategori = ["lineaere", "ligninger", "geometri"].includes(kategori.id);
   const erTekst =
-    opgave?.slags === "valg" || (fuldtTastatur && (opgave?.spoergsmaal.length ?? 0) > 34);
+    opgave?.slags === "valg" ||
+    kategori.id === "geometri" ||
+    (nyKategori && (opgave?.spoergsmaal.length ?? 0) > 34);
   const sideOmSide = opgave?.slags === "valg" && opgave.figur?.slags === "koordinatsystem";
 
   // ------------------------------------------------------------------ slut

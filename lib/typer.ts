@@ -4,7 +4,8 @@ export type KategoriId =
   | "enhedsomregning"
   | "procentogbroek"
   | "lineaere"
-  | "ligninger";
+  | "ligninger"
+  | "geometri";
 export type EmneId =
   | "addition"
   | "subtraktion"
@@ -20,7 +21,10 @@ export type EmneId =
   | "graf"
   | "trin"
   | "beggesider"
-  | "broekparentes";
+  | "broekparentes"
+  | "vinkler"
+  | "arealrumfang"
+  | "ligedannethed";
 
 /** En ret linje y = ax + b, som den tegnes i et koordinatsystem. */
 export type Linje = {
